@@ -122,12 +122,6 @@ def create_product(
     )
     db.add(product)
     db.flush()
-
-    # Si el producto se crea sin variantes, añadir una variante única por defecto.
-    default_variant = ProductVariant(product_id=product.id, size="Única", color="Estándar", stock=1)
-    db.add(default_variant)
-    db.flush()
-    _recalculate_product_stock(db, product_id=product.id)
     return product
 
 

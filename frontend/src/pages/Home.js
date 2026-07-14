@@ -1,7 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
 import ProductCard from "../components/ProductCard";
+import ProductVariantsModal from "../components/ProductVariantsModal";
 import { api } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import robotImage from "../Img/RobotRopaShop_1.png";
+import robotIcon from "../Img/RobotRopaShop_1.png";
+import robot2 from "../Img/RobotRopaShop_2_Con_Exito.png";
+import robot3 from "../Img/RobotRopaShop_3_Pensando.png";
+import robot4 from "../Img/RobotRopaShop_4_Saludando.png";
+import robot5 from "../Img/RobotRopaShop_5_Con_Error.png";
+import robot6 from "../Img/RobotRopaShop_6_contraseña oculta.png";
+import robot7 from "../Img/RobotRopaShop_7_mostrar contraseña.png";
+import robot8 from "../Img/RobotRopaShop_8_actualizar contraseña.png";
 
 export default function Home() {
   const { user } = useAuth();
@@ -23,6 +33,9 @@ export default function Home() {
   const [adminVariantStock, setAdminVariantStock] = useState(1);
   const [adminImageFile, setAdminImageFile] = useState(null);
   const [adminStatus, setAdminStatus] = useState({ type: "", message: "" });
+  const [showRobotModal, setShowRobotModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [selectedProductForVariants, setSelectedProductForVariants] = useState(null);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize]);
 
@@ -58,7 +71,7 @@ export default function Home() {
 
   useEffect(() => {
     loadProducts(page);
-  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [page, categoryId, q]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function compressProductImage(file) {
     return new Promise((resolve) => {
@@ -120,57 +133,132 @@ export default function Home() {
     }
 
     try {
-      const payload = {
-        name: adminName,
-        description: adminDescription,
-        price: Number(adminPrice),
-        category_id: Number(adminCategory),
-      };
+      if (editingProduct) {
+        // Editar producto existente
+        const payload = {
+          name: adminName,
+          description: adminDescription,
+          price: Number(adminPrice),
+          category_id: Number(adminCategory),
+        };
 
-      const res = await api.post("/products", payload);
+        await api.put(`/products/${editingProduct.id}`, payload);
 
-      if (adminVariantSize && adminVariantColor) {
-        try {
-          await api.post(`/products/${res.data.id}/variants`, {
-            size: adminVariantSize,
-            color: adminVariantColor,
-            stock: Number(adminVariantStock) || 1,
-          });
-        } catch {
-          setAdminStatus({ type: "danger", message: "Producto creado, pero no se pudo crear la variante." });
-          setAdminName("");
-          setAdminDescription("");
-          setAdminPrice(0);
-          setAdminCategory("");
-          setAdminVariantSize("");
-          setAdminVariantColor("");
-          setAdminVariantStock(1);
-          setAdminImageFile(null);
-          e.target.reset();
-          setPage(1);
-          loadProducts(1);
-          return;
+        if (adminImageFile) {
+          const compressedImage = await compressProductImage(adminImageFile);
+          const formData = new FormData();
+          formData.append("archivo", compressedImage);
+          await api.post(`/products/${editingProduct.id}/image`, formData);
         }
+
+        setAdminStatus({ type: "ok", message: "Producto actualizado exitosamente." });
+      } else {
+        // Crear nuevo producto
+        const payload = {
+          name: adminName,
+          description: adminDescription,
+          price: Number(adminPrice),
+          category_id: Number(adminCategory),
+        };
+
+        const res = await api.post("/products", payload);
+
+        if (adminVariantSize && adminVariantColor) {
+          try {
+            await api.post(`/products/${res.data.id}/variants`, {
+              size: adminVariantSize,
+              color: adminVariantColor,
+              stock: Number(adminVariantStock) || 1,
+            });
+          } catch {
+            setAdminStatus({ type: "danger", message: "Producto creado, pero no se pudo crear la variante." });
+            setAdminName("");
+            setAdminDescription("");
+            setAdminPrice(0);
+            setAdminCategory("");
+            setAdminVariantSize("");
+            setAdminVariantColor("");
+            setAdminVariantStock(1);
+            setAdminImageFile(null);
+            e.target.reset();
+            setPage(1);
+            loadProducts(1);
+            return;
+          }
+        }
+
+        if (adminImageFile) {
+          const compressedImage = await compressProductImage(adminImageFile);
+          const formData = new FormData();
+          formData.append("archivo", compressedImage);
+          await api.post(`/products/${res.data.id}/image`, formData);
+        }
+
+        setAdminStatus({ type: "ok", message: "Producto creado exitosamente." });
       }
 
-      if (adminImageFile) {
-        const compressedImage = await compressProductImage(adminImageFile);
-        const formData = new FormData();
-        formData.append("archivo", compressedImage);
-        await api.post(`/products/${res.data.id}/image`, formData);
-      }
-
-      setAdminStatus({ type: "ok", message: "Producto creado exitosamente." });
-      setAdminName("");
-      setAdminDescription("");
-      setAdminPrice(0);
-      setAdminCategory("");
-      setAdminImageFile(null);
+      resetAdminForm();
       e.target.reset();
       setPage(1);
       loadProducts(1);
     } catch (err) {
-      setAdminStatus({ type: "danger", message: "No se pudo crear el producto." });
+      setAdminStatus({ type: "danger", message: editingProduct ? "No se pudo actualizar el producto." : "No se pudo crear el producto." });
+    }
+  }
+
+  function resetAdminForm() {
+    setAdminName("");
+    setAdminDescription("");
+    setAdminPrice(0);
+    setAdminCategory("");
+    setAdminVariantSize("");
+    setAdminVariantColor("");
+    setAdminVariantStock(1);
+    setAdminImageFile(null);
+    setAdminStatus({ type: "", message: "" });
+    setEditingProduct(null);
+  }
+
+  function handleEditProduct(product) {
+    console.log("handleEditProduct - Product data:", product);
+    console.log("handleEditProduct - product.name:", product.name);
+    console.log("handleEditProduct - product.price:", product.price);
+    console.log("handleEditProduct - product.category_id:", product.category_id);
+
+    setEditingProduct(product);
+    setAdminName(product.name || "");
+    setAdminDescription(product.description || "");
+    setAdminPrice(product.price || 0);
+    setAdminCategory(product.category_id || "");
+    setAdminVariantSize("");
+    setAdminVariantColor("");
+    setAdminVariantStock(1);
+    setAdminImageFile(null);
+    setAdminStatus({ type: "", message: "" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function handleDeleteProduct(product) {
+    if (!window.confirm(`¿Estás seguro de eliminar "${product.name}"?`)) {
+      return;
+    }
+
+    try {
+      await api.delete(`/products/${product.id}`);
+      setAdminStatus({ type: "ok", message: "Producto eliminado exitosamente." });
+      setPage(1);
+      loadProducts(1);
+    } catch (err) {
+      setAdminStatus({ type: "danger", message: "No se pudo eliminar el producto." });
+    }
+  }
+
+  async function handleEditVariants(product) {
+    try {
+      const res = await api.get(`/products/${product.id}`);
+      setSelectedProductForVariants(res.data);
+    } catch (err) {
+      alert("No se pudo cargar las variantes del producto");
     }
   }
 
@@ -182,12 +270,72 @@ export default function Home() {
 
   return (
     <div className="homePage stack">
+      <img src={robotImage} alt="Robot RopaShop" className="robotRopaShop" />
+      <img
+        src={robotIcon}
+        alt="Robot Icon"
+        className="robotIconMobile"
+        onClick={() => setShowRobotModal(true)}
+        title="Conoce la mascota de nuestra compañía"
+      />
+      {showRobotModal && (
+        <div className="robotModal" onClick={() => setShowRobotModal(false)}>
+          <div className="robotModalContent" onClick={(e) => e.stopPropagation()}>
+            <button className="robotModalClose" onClick={() => setShowRobotModal(false)}>×</button>
+            <h2>Conoce a nuestra mascota</h2>
+            <div className="robotGallery">
+              <div className="robotItem">
+                <img src={robotImage} alt="Robot 1" />
+                <p>Robot Base</p>
+              </div>
+              <div className="robotItem">
+                <img src={robot2} alt="Robot 2 - Con Éxito" />
+                <p>Con Éxito</p>
+              </div>
+              <div className="robotItem">
+                <img src={robot3} alt="Robot 3 - Pensando" />
+                <p>Pensando</p>
+              </div>
+              <div className="robotItem">
+                <img src={robot4} alt="Robot 4 - Saludando" />
+                <p>Saludando</p>
+              </div>
+              <div className="robotItem">
+                <img src={robot5} alt="Robot 5 - Con Error" />
+                <p>Con Error</p>
+              </div>
+              <div className="robotItem">
+                <img src={robot6} alt="Robot 6 - Contraseña Oculta" />
+                <p>Contraseña Oculta</p>
+              </div>
+              <div className="robotItem">
+                <img src={robot7} alt="Robot 7 - Mostrar Contraseña" />
+                <p>Mostrar Contraseña</p>
+              </div>
+              <div className="robotItem">
+                <img src={robot8} alt="Robot 8 - Actualizar Contraseña" />
+                <p>Actualizar Contraseña</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <section className="homeHero">
         <div className="heroOverlay" />
         <div className="container heroContent">
           <div className="heroTopNav">
             <span className="heroTag">NIGHT SALE 🔥</span>
-            <button className="heroCTA" type="button">
+            <button
+              className="heroCTA"
+              type="button"
+              onClick={() => {
+                setQ("");
+                setCategoryId("");
+                setPage(1);
+                loadProducts(1);
+                document.getElementById("searchInput")?.focus();
+              }}
+            >
               Ver todo
             </button>
           </div>
@@ -209,6 +357,7 @@ export default function Home() {
                   setCategoryId("");
                   setPage(1);
                   loadProducts(1);
+                  document.getElementById("searchInput")?.focus();
                 }}
               >
                 Explorar catálogo
@@ -294,7 +443,7 @@ export default function Home() {
               <label>Stock variante</label>
               <input
                 type="number"
-                min="0"
+                min="1"
                 step="1"
                 value={adminVariantStock}
                 onChange={(e) => setAdminVariantStock(Number(e.target.value))}
@@ -312,8 +461,13 @@ export default function Home() {
             </div>
             <div className="field actions adminActions">
               <button className="btn" type="submit">
-                Crear producto
+                {editingProduct ? "Actualizar producto" : "Crear producto"}
               </button>
+              {editingProduct && (
+                <button className="btn ghost" type="button" onClick={resetAdminForm}>
+                  Cancelar
+                </button>
+              )}
             </div>
             {adminStatus.message ? (
               <div className={`panel ${adminStatus.type}`}>{adminStatus.message}</div>
@@ -335,7 +489,6 @@ export default function Home() {
               onClick={() => {
                 setCategoryId("");
                 setPage(1);
-                loadProducts(1);
               }}
             >
               Todas
@@ -348,7 +501,6 @@ export default function Home() {
                 onClick={() => {
                   setCategoryId(String(c.id));
                   setPage(1);
-                  loadProducts(1);
                 }}
               >
                 {c.name}
@@ -405,9 +557,17 @@ export default function Home() {
 
       <section className="grid">
         {items.length
-          ? items.map((p) => <ProductCard key={p.id} p={p} />)
+          ? items.map((p) => <ProductCard key={p.id} p={p} onEditVariants={handleEditVariants} onDelete={handleDeleteProduct} />)
           : !loading && <div className="panel muted">No hay productos disponibles para esta búsqueda.</div>}
       </section>
+
+      {selectedProductForVariants && (
+        <ProductVariantsModal
+          product={selectedProductForVariants}
+          onClose={() => setSelectedProductForVariants(null)}
+          onUpdate={() => loadProducts(page)}
+        />
+      )}
 
       <section className="pager">
         <button className="btn ghost" disabled={page <= 1} onClick={() => setPage((v) => v - 1)}>

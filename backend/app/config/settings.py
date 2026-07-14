@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
     # Dirección de la base de datos.
-    database_url: str = Field(default="sqlite:///./app.db")
+    database_url: str = Field(default="postgresql://postgres:root@localhost/RopaShop")
 
     # Clave secreta para crear tokens de acceso.
     jwt_secret_key: str = Field(default="dev-secret-key-change-me")

@@ -23,11 +23,11 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def registrar_usuario(datos: UserCreate, db: Session = Depends(get_db)) -> AuthResponse:
     # datos contiene el nombre, correo y contraseña del nuevo usuario.
     try:
-        # Crear el usuario dentro de una transacción pequeña y segura.
-        with db.begin():
-            usuario = register_user(db, name=datos.name, email=str(datos.email).lower(), password=datos.password)
+        usuario = register_user(db, name=datos.name, email=str(datos.email).lower(), password=datos.password)
+        db.commit()
     except ValueError as exc:
         # Si el correo ya existe, mostrar un error claro.
+        db.rollback()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
 
     # Crear un token para que el usuario pueda entrar después.
@@ -38,8 +38,8 @@ def registrar_usuario(datos: UserCreate, db: Session = Depends(get_db)) -> AuthR
 @router.post("/guest", response_model=AuthResponse, status_code=201)
 def invitado_sin_login(db: Session = Depends(get_db)) -> AuthResponse:
     # Crear un usuario temporal para que el cliente pueda comprar sin iniciar sesión.
-    with db.begin():
-        usuario = create_guest_user(db)
+    usuario = create_guest_user(db)
+    db.commit()
     token = TokenOut(access_token=create_access_token(subject=str(usuario.id), role=str(usuario.role.value)))
     return AuthResponse(user=UserOut.model_validate(usuario), token=token)
 
@@ -70,10 +70,10 @@ def actualizar_perfil(
     usuario_actual: User = Depends(get_current_user),
 ) -> UserOut:
     # datos trae los cambios que el usuario quiere guardar.
-    with db.begin():
-        usuario_actual.name = datos.name
-        usuario_actual.phone = datos.phone
-        usuario_actual.address = datos.address
+    usuario_actual.name = datos.name
+    usuario_actual.phone = datos.phone
+    usuario_actual.address = datos.address
+    db.commit()
 
     # Mostrar el perfil ya actualizado.
     return UserOut.model_validate(usuario_actual)

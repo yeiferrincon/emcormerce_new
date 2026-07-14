@@ -250,13 +250,13 @@ main.container { flex: 1; padding: 18px 0 40px; }
   margin: 0;
   font-size: clamp(2.5rem, 2.3vw, 4rem);
   line-height: 1.02;
-  color: #0f172a;
+  color: #f2f2f3;
 }
 .heroText {
   margin: 20px 0 0;
   max-width: 640px;
   line-height: 1.75;
-  color: #475569;
+  color: #e2e6eb;
 }
 .heroActions {
   margin-top: 28px;
@@ -404,11 +404,16 @@ input:focus, select:focus {
 .cardMedia {
   height: 260px;
   background: linear-gradient(180deg, #ffffff, #f8fafc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 .cardMedia img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  object-position: center;
   padding: 12px;
 }
 .cardBody { padding: 18px; }
@@ -425,6 +430,143 @@ input:focus, select:focus {
   color: #475569;
 }
 .price { font-weight: 800; color: #111827; }
+
+.cardActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.cardActions .btn {
+  flex: 1;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.cardActions .btn.danger {
+  background: #ef4444;
+  color: white;
+}
+
+.cardActions .btn.danger:hover {
+  background: #dc2626;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.variantsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.variantItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.variantInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.variantInfo strong {
+  font-size: 14px;
+}
+
+.variantInfo span {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.variantActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.variantStock {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.variantStock span {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.variantEdit {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.smallInput {
+  width: 80px;
+  padding: 6px 8px;
+  font-size: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+}
 
 .placeholder {
   height: 100%;
@@ -553,8 +695,28 @@ input:focus, select:focus {
 .cartMeta{ display:flex; gap: 10px; }
 .cartPrice{ font-weight: 800; margin-top: 4px; }
 
-.auth{ display:grid; place-items:center; padding: 18px 0; }
+.auth{ display:grid; place-items:center; padding: 18px 0; position: relative; }
 .authCard{ width: min(420px, 100%); }
+
+/* Robot en página de login/registro */
+.authRobot {
+  position: fixed;
+  width: 280px;
+  height: 280px;
+  object-fit: contain;
+  z-index: 10;
+  transition: all 0.3s ease;
+  top: 40%;
+  transform: translateY(-50%);
+}
+
+.authRobotleft {
+  left: 65%;
+}
+
+.authRobotright {
+  left: 65%;
+}
 .footer{ border-top: 1px solid var(--line); padding: 18px 0; background: rgba(11,15,20,.45); backdrop-filter: blur(10px); }
 .footerInner{ display:flex; justify-content:space-between; align-items:center; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
 
@@ -562,4 +724,157 @@ input:focus, select:focus {
   .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .filters{ grid-template-columns: 1fr; }
   .detail{ grid-template-columns: 1fr; }
+}
+
+/* Robot RopaShop - Icono flotante (visible siempre) */
+.robotIconMobile {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: auto;
+  z-index: 100;
+  cursor: pointer;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease;
+}
+
+.robotIconMobile:hover {
+  transform: scale(1.1);
+}
+
+/* Robot RopaShop - Ocultar robot flotante en pantallas reducidas */
+@media (max-width: 1469px) {
+  .robotRopaShop {
+    display: none;
+  }
+}
+
+/* Robot RopaShop - Modal */
+.robotModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+}
+
+.robotModalContent {
+  background: white;
+  border-radius: 16px;
+  padding: 25px;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.robotModalClose {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.robotModalContent h2 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  color: var(--text);
+  text-align: center;
+}
+
+.robotGallery {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 20px;
+  justify-items: center;
+  max-width: 450px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.robotItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 180px;
+  box-sizing: border-box;
+}
+
+.robotItem img {
+  width: 100%;
+  height: 150px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.robotItem p {
+  margin: 8px 0 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  width: 100%;
+}
+
+.robotItem:last-child {
+  grid-column: span 2;
+}
+
+.robotItem:last-child img {
+  max-width: 50%;
+}
+
+/* Robot RopaShop - Estilos para el robot flotante */
+.robotRopaShop {
+  position: fixed;
+  left: 1%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 280px;
+  height: auto;
+  z-index: 25;
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Robot RopaShop - Versión derecha para Orders */
+.robotRopaShopRight {
+  position: fixed;
+  right: 1%;
+  top: 50%;
+  transform: translateY(-50%) scaleX(-1);
+  width: 280px;
+  height: auto;
+  z-index: 25;
+  animation: float 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(-50%) translateY(0px);
+  }
+  50% {
+    transform: translateY(-50%) translateY(-15px);
+  }
 }

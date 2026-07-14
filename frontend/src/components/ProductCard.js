@@ -1,12 +1,20 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-export default function ProductCard({ p }) {
+export default function ProductCard({ p, onEditVariants, onDelete }) {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+
+  console.log("ProductCard - User:", user);
+  console.log("ProductCard - isAdmin:", isAdmin);
+  console.log("ProductCard - Product:", p);
+
   return (
-    <Link to={`/products/${p.id}`} className="card">
-      <div className="cardMedia">
+    <div className="card">
+      <Link to={`/products/${p.id}`} className="cardMedia">
         {p.image_url ? <img src={p.image_url} alt={p.name} loading="lazy" /> : <div className="placeholder">Sin imagen</div>}
-      </div>
+      </Link>
       <div className="cardBody">
         <div className="cardTitle">{p.name}</div>
         <div className="cardMeta">
@@ -15,8 +23,18 @@ export default function ProductCard({ p }) {
           </span>
           <span className="muted">{p.stock} stock</span>
         </div>
+        {isAdmin && (
+          <div className="cardActions">
+            <button className="btn small" onClick={() => onEditVariants && onEditVariants(p)}>
+              Variantes
+            </button>
+            <button className="btn small danger" onClick={() => onDelete && onDelete(p)}>
+              Eliminar
+            </button>
+          </div>
+        )}
       </div>
-    </Link>
+    </div>
   );
 }
 
