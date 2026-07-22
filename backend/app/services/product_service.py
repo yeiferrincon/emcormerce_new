@@ -70,7 +70,22 @@ def list_products(
     page = max(1, int(page))
     page_size = min(50, max(1, int(page_size)))
 
-    stmt = select(Product).options(joinedload(Product.variants)).order_by(Product.created_at.desc())
+    # Calcular stock dinámicamente basado en variantes
+    stock_subquery = (
+        select(
+            ProductVariant.product_id,
+            func.coalesce(func.sum(ProductVariant.stock), 0).label("total_stock")
+        )
+        .group_by(ProductVariant.product_id)
+        .subquery()
+    )
+
+    stmt = (
+        select(Product)
+        .outerjoin(stock_subquery, Product.id == stock_subquery.c.product_id)
+        .options(joinedload(Product.variants))
+        .order_by(Product.created_at.desc())
+    )
     count_stmt = select(func.count(Product.id))
 
     filters = []
@@ -99,6 +114,15 @@ def list_products(
     items = list(
         db.execute(stmt.offset((page - 1) * page_size).limit(page_size)).unique().scalars().all()
     )
+
+    # Actualizar el stock de cada producto con el valor calculado
+    for product in items:
+        total_stock = db.execute(
+            select(func.coalesce(func.sum(ProductVariant.stock), 0))
+            .where(ProductVariant.product_id == product.id)
+        ).scalar_one()
+        product.stock = int(total_stock)
+
     return total, items
 
 

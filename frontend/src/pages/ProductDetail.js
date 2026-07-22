@@ -66,7 +66,10 @@ export default function ProductDetail({ ui }) {
       } else {
         payload.product_id = Number(id);
       }
-      await api.post("/cart/add", payload);
+      // Usar el token directamente para asegurar que se envíe
+      await api.post("/cart/add", payload, {
+        headers: { Authorization: `Bearer ${activeToken}` }
+      });
       ui?.setCartOpen(true);
       setMsg("Agregado al carrito.");
     } catch (e) {
@@ -94,7 +97,7 @@ export default function ProductDetail({ ui }) {
         <h2>{p.name}</h2>
         <div className="detailMeta">
           <span className="price">{priceLabel}</span>
-          <span className="muted">{p.stock} stock</span>
+          <span className="muted">{selectedVariant ? `${selectedVariant.stock} stock` : `${p.stock} stock`}</span>
         </div>
         {p.description ? <p className="muted">{p.description}</p> : null}
 

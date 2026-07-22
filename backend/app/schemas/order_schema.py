@@ -13,11 +13,26 @@ from pydantic import BaseModel
 class OrderItemOut(BaseModel):
     # Forma de devolver un producto incluido en una orden.
     id: int
+    product_id: int
     product_variant_id: int
     quantity: int
     price: float
+    product_name: str | None = None
+    variant_size: str | None = None
+    variant_color: str | None = None
 
-    model_config = {"from_attributes": True}
+    @classmethod
+    def from_order_item(cls, order_item):
+        return cls(
+            id=order_item.id,
+            product_id=order_item.product_id,
+            product_variant_id=order_item.product_variant_id,
+            quantity=order_item.quantity,
+            price=float(order_item.price),
+            product_name=order_item.product.name if order_item.product else None,
+            variant_size=order_item.variant.size if order_item.variant else None,
+            variant_color=order_item.variant.color if order_item.variant else None,
+        )
 
 
 class OrderOut(BaseModel):
@@ -29,6 +44,8 @@ class OrderOut(BaseModel):
     currency: str
     shipping_address: str | None = None
     shipping_phone: str | None = None
+    cancellation_comment: str | None = None
+    original_order_id: int | None = None
     created_at: datetime
     items: list[OrderItemOut]
 

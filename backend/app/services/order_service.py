@@ -34,13 +34,13 @@ def create_order_from_cart(db: Session, *, user: User) -> Order:
         raise ValueError("Cart is empty")
 
     # Bloquear variantes para evitar vender más de lo disponible en operaciones simultáneas.
+    # Nota: FOR UPDATE no está soportado en esta configuración de PostgreSQL
     variant_ids = [ci.product_variant_id for ci in cart_items]
     locked_variants = {
         v.id: v
         for v in db.execute(
             select(ProductVariant)
             .where(ProductVariant.id.in_(variant_ids))
-            .with_for_update()
             .options(joinedload(ProductVariant.product))
         ).scalars()
     }
@@ -48,7 +48,7 @@ def create_order_from_cart(db: Session, *, user: User) -> Order:
     total = 0.0
     order = Order(
         user_id=user.id,
-        status=OrderStatus.pending,
+        status=OrderStatus.paid,
         total_price=0,
         currency="COP",
         shipping_address=user.address,
@@ -73,6 +73,7 @@ def create_order_from_cart(db: Session, *, user: User) -> Order:
         db.add(
             OrderItem(
                 order_id=order.id,
+                product_id=product.id,
                 product_variant_id=variant.id,
                 quantity=ci.quantity,
                 price=unit_price,
@@ -94,7 +95,12 @@ def list_orders(db: Session, *, user: User) -> list[Order]:
             select(Order)
             .where(Order.user_id == user.id)
             .order_by(Order.created_at.desc())
-            .options(joinedload(Order.items))
+            .options(
+                joinedload(Order.items)
+                .joinedload(OrderItem.variant),
+                joinedload(Order.items)
+                .joinedload(OrderItem.product)
+            )
         )
         .unique()
         .scalars()

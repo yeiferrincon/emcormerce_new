@@ -19,9 +19,11 @@ class OrderStatus(str, enum.Enum):
     # Estados posibles de una orden.
     pending = "pending"
     paid = "paid"
-    cancelled = "cancelled"
+    processing = "processing"  # despachar
     shipped = "shipped"
     delivered = "delivered"
+    cancelled = "cancelled"
+    duplicated = "duplicated"
 
 
 class Order(Base):
@@ -36,6 +38,8 @@ class Order(Base):
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="COP")  # Moneda usada.
     shipping_address: Mapped[str | None] = mapped_column(String(500), nullable=True)  # Dirección de envío.
     shipping_phone: Mapped[str | None] = mapped_column(String(32), nullable=True)  # Teléfono de contacto.
+    cancellation_comment: Mapped[str | None] = mapped_column(String(1000), nullable=True)  # Comentario de cancelación.
+    original_order_id: Mapped[int | None] = mapped_column(ForeignKey("orders.id", ondelete="SET NULL"), nullable=True, index=True)  # ID del pedido original si este es una duplicación.
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # Relación con el usuario que hizo la compra.

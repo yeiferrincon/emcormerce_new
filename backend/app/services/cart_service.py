@@ -43,6 +43,24 @@ def get_cart_details(db: Session, *, user: User) -> dict:
         product: Product = variant.product  # type: ignore[assignment]
         unit_price = float(product.price)
         subtotal += unit_price * item.quantity
+        
+        # Obtener todas las variantes disponibles del producto
+        all_variants = db.execute(
+            select(ProductVariant)
+            .where(ProductVariant.product_id == product.id)
+        ).scalars().all()
+        
+        available_variants = [
+            {
+                "id": v.id,
+                "size": v.size,
+                "color": v.color,
+                "stock": v.stock,
+                "price": unit_price
+            }
+            for v in all_variants
+        ]
+        
         out_items.append(
             {
                 "id": item.id,
@@ -54,6 +72,7 @@ def get_cart_details(db: Session, *, user: User) -> dict:
                 "color": variant.color,
                 "unit_price": unit_price,
                 "image_url": product.image_url,
+                "available_variants": available_variants,
             }
         )
 
@@ -97,6 +116,29 @@ def remove_from_cart(db: Session, *, user: User, product_variant_id: int) -> dic
     if item:
         db.delete(item)
         db.flush()
+    return get_cart_details(db, user=user)
+
+
+def update_cart_item_quantity(db: Session, *, user: User, product_variant_id: int, quantity: int) -> dict:
+    # Actualizar la cantidad de un item en el carrito.
+    if quantity < 1:
+        raise ValueError("Invalid quantity")
+    cart = get_or_create_cart(db, user=user)
+    variant = db.get(ProductVariant, product_variant_id)
+    if not variant:
+        raise ValueError("Variant not found")
+    if quantity > variant.stock:
+        raise ValueError("Not enough stock")
+
+    item = db.execute(
+        select(CartItem).where(CartItem.cart_id == cart.id, CartItem.product_variant_id == product_variant_id)
+    ).scalar_one_or_none()
+    if item:
+        item.quantity = quantity
+        db.flush()
+    else:
+        raise ValueError("Item not found in cart")
+
     return get_cart_details(db, user=user)
 
 

@@ -16,6 +16,7 @@ class OrderItem(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)  # Identificador del item dentro de la orden.
     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"), nullable=False, index=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id", ondelete="RESTRICT"), nullable=False, index=True)
     product_variant_id: Mapped[int] = mapped_column(
         ForeignKey("product_variants.id", ondelete="RESTRICT"), nullable=False, index=True
     )
@@ -26,4 +27,6 @@ class OrderItem(Base):
     order: Mapped["Order"] = relationship(back_populates="items")
     # Relación con la variante comprada.
     variant: Mapped["ProductVariant"] = relationship()
+    # Relación con el producto.
+    product: Mapped["Product"] = relationship()
 

@@ -10,9 +10,19 @@ from sqlalchemy.orm import Session
 
 from app.config.database import get_db
 from app.dependencies.auth import get_current_user
-from app.schemas.cart_schema import CartAddIn, CartOut, CartRemoveIn
+from app.schemas.cart_schema import (
+    CartAddIn,
+    CartOut,
+    CartRemoveIn,
+    CartUpdateIn,
+)
 from app.services import product_service
-from app.services.cart_service import add_to_cart, get_cart_details, remove_from_cart
+from app.services.cart_service import (
+    add_to_cart,
+    get_cart_details,
+    remove_from_cart,
+    update_cart_item_quantity,
+)
 
 
 router = APIRouter(prefix="/cart", tags=["cart"])
@@ -49,6 +59,21 @@ def quitar_del_carrito(datos: CartRemoveIn, db: Session = Depends(get_db), usuar
         carrito = remove_from_cart(db, user=usuario, product_variant_id=datos.product_variant_id)
         db.commit()
         return CartOut.model_validate(carrito)
+    except Exception:
+        db.rollback()
+        raise
+
+
+@router.put("/update", response_model=CartOut)
+def actualizar_cantidad(datos: CartUpdateIn, db: Session = Depends(get_db), usuario=Depends(get_current_user)) -> CartOut:
+    # datos indica qué variante y la nueva cantidad.
+    try:
+        carrito = update_cart_item_quantity(db, user=usuario, product_variant_id=datos.product_variant_id, quantity=datos.quantity)
+        db.commit()
+        return CartOut.model_validate(carrito)
+    except ValueError as exc:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(exc))
     except Exception:
         db.rollback()
         raise

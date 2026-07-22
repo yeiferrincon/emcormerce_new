@@ -19,6 +19,7 @@ class CartItemOut(BaseModel):
     color: str
     unit_price: float
     image_url: str | None = None
+    available_variants: list[dict] | None = None
 
 
 class CartOut(BaseModel):
@@ -47,4 +48,10 @@ class CartAddIn(BaseModel):
 class CartRemoveIn(BaseModel):
     # Datos para quitar una variante específica del carrito.
     product_variant_id: int
+
+
+class CartUpdateIn(BaseModel):
+    # Datos para actualizar la cantidad de una variante en el carrito.
+    product_variant_id: int
+    quantity: int = Field(ge=1, le=50)
 

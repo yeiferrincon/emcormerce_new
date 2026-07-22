@@ -13,6 +13,9 @@ export function AuthProvider({ children }) {
     }
   });
 
+  console.log("AuthProvider - Estado inicial:", { token: token ? "existe" : "no existe", user });
+  console.log("AuthProvider - Token en localStorage:", localStorage.getItem("token"));
+
   useEffect(() => {
     setAuthToken(token || "");
     if (token) localStorage.setItem("token", token);
@@ -26,13 +29,17 @@ export function AuthProvider({ children }) {
 
   async function createGuestSession() {
     try {
+      console.log("Creando sesión de invitado...");
       const res = await api.post("/auth/guest");
+      console.log("Respuesta de guest:", res.data);
       const guestToken = res.data.token.access_token;
       setAuthToken(guestToken);
       setToken(guestToken);
       setUser(res.data.user);
+      console.log("Sesión de invitado creada exitosamente");
       return guestToken;
-    } catch {
+    } catch (e) {
+      console.error("Error al crear sesión de invitado:", e);
       // Si falla, el cliente puede intentar de nuevo más tarde.
       return "";
     }
