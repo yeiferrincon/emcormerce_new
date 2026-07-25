@@ -46,11 +46,50 @@ export default function App() {
       </main>
       <footer className="footer">
         <div className="container footerInner">
-          <div>
+          <div className="footerColumn">
             <span className="footerBrand">RopaShop</span>
-            <p className="muted">Moda pastel y diseño ligero para tu tienda online.</p>
+            <p className="footerText">Tu tienda online de moda. Compra de forma segura, descubre nuevas colecciones y recibe tus pedidos hasta la puerta de tu hogar.</p>
           </div>
-          <span className="muted">FastAPI + React</span>
+          <div className="footerColumn footerCenter">
+            <span className="footerTitle">Tecnologías</span>
+            <div className="footerTechColumns">
+              <div className="footerTechColumn">
+                <span className="footerSubtitle">Frontend</span>
+                <ul className="footerList">
+                  <li>React + Vite</li>
+                  <li>HTML</li>
+                  <li>JavaScript</li>
+                  <li>CSS</li>
+                </ul>
+              </div>
+              <div className="footerTechColumn">
+                <span className="footerSubtitle">Backend</span>
+                <ul className="footerList">
+                  <li>FastAPI</li>
+                  <li>Python</li>
+                </ul>
+              </div>
+              <div className="footerTechColumn">
+                <span className="footerSubtitle">Base de Datos</span>
+                <ul className="footerList">
+                  <li>PostgreSQL</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div className="footerColumn">
+            <span className="footerTitle">Contacto</span>
+            <p className="footerText">📍Cra. 29 123 45 Colombia</p>
+            <p className="footerText">📞 +57 555 123 4567</p>
+            <p className="footerText">✉ contacto@ropashop.com</p>
+          </div>
+        </div>
+        <div className="container footerBottom">
+          <div className="footerColumn"></div>
+          <div className="footerColumn footerCenter">
+            <p className="footerText">2026 Enca24</p>
+          </div>
+          <div className="footerColumn"></div>
         </div>
       </footer>
     </div>
