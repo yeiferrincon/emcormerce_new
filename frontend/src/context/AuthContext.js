@@ -12,8 +12,6 @@ export function AuthProvider({ children }) {
       return null;
     }
   });
-  const [isLoggedOut, setIsLoggedOut] = useState(false);
-  const [isAuthReady, setIsAuthReady] = useState(false);
 
   console.log("AuthProvider - Estado inicial:", { token: token ? "existe" : "no existe", user });
   console.log("AuthProvider - Token en localStorage:", localStorage.getItem("token"));
@@ -22,7 +20,6 @@ export function AuthProvider({ children }) {
     setAuthToken(token || "");
     if (token) localStorage.setItem("token", token);
     else localStorage.removeItem("token");
-    setIsAuthReady(true);
   }, [token]);
 
   useEffect(() => {
@@ -49,29 +46,26 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    if (!token && !isLoggedOut) {
+    if (!token) {
       createGuestSession();
     }
-  }, [token, isLoggedOut]);
+  }, [token]);
 
   async function login(email, password) {
     const res = await api.post("/auth/login", { email, password });
     setToken(res.data.token.access_token);
     setUser(res.data.user);
-    setIsLoggedOut(false);
   }
 
   async function register(name, email, password) {
     const res = await api.post("/auth/register", { name, email, password });
     setToken(res.data.token.access_token);
     setUser(res.data.user);
-    setIsLoggedOut(false);
   }
 
   function logout() {
     setToken("");
     setUser(null);
-    setIsLoggedOut(true);
   }
 
   function updateUser(updatedUser) {
@@ -79,8 +73,8 @@ export function AuthProvider({ children }) {
   }
 
   const value = useMemo(
-    () => ({ token, user, login, register, logout, updateUser, createGuestSession, isAuthReady }),
-    [token, user, isAuthReady]
+    () => ({ token, user, login, register, logout, updateUser, createGuestSession }),
+    [token, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

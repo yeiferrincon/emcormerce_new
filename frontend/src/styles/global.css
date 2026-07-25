@@ -663,73 +663,62 @@ input:focus, select:focus {
   cursor: pointer;
 }
 
-/* ============================================
-   FOOTER (versión que funcionaba bien)
-   ============================================ */
-.footer{ border-top: 1px solid var(--line); padding: 6px 35px 6px 35px; background: rgba(11,15,20,.45); backdrop-filter: blur(10px); }
-.footerInner{ display:flex; justify-content:space-between; align-items:flex-start; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; gap: 30px; margin-bottom: 6px; }
-.footerBottom{ display:flex; justify-content:space-between; align-items:center; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; gap: 30px; }
+.footer {
+  background: linear-gradient(180deg, #eef2ff, #f8fafc);
+}
+.footerInner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 26px 0;
+  color: var(--text);
+}
+.footerBrand { font-weight: 800; font-size: 18px; }
 
-.footerColumn { flex: 1; min-width: 0; }
-.footerColumn:first-child { 
-  flex: 0 0 auto; 
-  max-width: 350px; 
-  margin-right: 40px;
+.cartItem{
+  display:grid;
+  grid-template-columns: 56px 1fr 34px;
+  gap: 10px;
+  align-items:center;
+  padding: 10px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
 }
-.footerColumn:last-child { 
-  flex: 0 0 auto; 
-  max-width: 220px; 
-  text-align: right; 
-  margin-left: 40px;
+.cartThumb img, .thumbPh{
+  width: 56px; height: 56px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
 }
-.footerCenter { 
-  flex: 1; 
-  text-align: center; 
-  max-width: 500px; 
-  min-width: 200px;
+.cartName{ font-weight: 750; }
+.cartMeta, .cartPrice{ font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+.cartMeta{ display:flex; gap: 10px; align-items: center; }
+.quantityControl {
+  display: flex;
+  align-items: center;
 }
-.footerBrand { font-size: 22px; font-weight: bold; color: white; display: block; margin-bottom: 6px; }
-.footerTitle { font-size: 16px; font-weight: bold;color: white; display: block; margin-bottom: 6px; }
-.footerSubtitle { font-size: 14px; font-weight: bold; color: rgba(255,255,255,0.8); display: block; margin-bottom: 4px; }
-.footerText { color: white; margin: 2px 0; font-size: 13px; line-height: 1.4; word-wrap: break-word; }
-.footerTechColumns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; text-align: left; }
-.footerTechColumn { display: flex; flex-direction: column; }
-.footerList { list-style: none; padding: 0; margin: 0; }
-.footerList li { color: white; margin: 2px 0; font-size: 13px; line-height: 1.4; padding-left: 12px; position: relative; }
-.footerList li::before { content: "•"; position: absolute; left: 0; color: white; }
+.quantityInput {
+  width: 50px;
+  padding: 4px 8px;
+  border: 1px solid rgba(255,255,255,.20);
+  border-radius: 6px;
+  background: rgba(255,255,255,.08);
+  color: white;
+  font-size: 14px;
+  text-align: center;
+}
+.quantityInput:focus {
+  outline: none;
+  border-color: rgba(255,255,255,.40);
+  background: rgba(255,255,255,.12);
+}
+.cartPrice{ font-weight: 800; margin-top: 4px; }
 
-@media (max-width: 980px){
-  .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .filters{ grid-template-columns: 1fr; }
-  .detail{ grid-template-columns: 1fr; }
-  
-  .footerInner { 
-    flex-direction: column; 
-    align-items: center; 
-    gap: 20px;
-  }
-  .footerColumn:first-child,
-  .footerColumn:last-child {
-    max-width: 100%;
-    margin-right: 0;
-    margin-left: 0;
-    text-align: center;
-  }
-  .footerColumn:last-child {
-    text-align: center;
-  }
-  .footerCenter {
-    max-width: 100%;
-    min-width: auto;
-  }
-  .footerTechColumns {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* ============================================
-   ROBOTS - Versión actualizada con 8 robots
-   ============================================ */
+.auth{ display:grid; place-items:center; padding: 18px 0; position: relative; }
+.authCard{ width: min(420px, 100%); }
 
 /* Robot en página de login/registro */
 .authRobot {
@@ -750,28 +739,13 @@ input:focus, select:focus {
 .authRobotright {
   left: 65%;
 }
+.footer{ border-top: 1px solid var(--line); padding: 18px 0; background: rgba(11,15,20,.45); backdrop-filter: blur(10px); }
+.footerInner{ display:flex; justify-content:space-between; align-items:center; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
 
-/* Ocultar robot en pantallas pequeñas */
-@media (max-width: 1469px) {
-  .authRobot {
-    display: none;
-  }
-  .robotRopaShopLeft {
-    display: none;
-  }
-  .robotRopaShopRight {
-    display: none;
-  }
-}
-
-/* Animación flotante para robots */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(-50%) translateY(0px);
-  }
-  50% {
-    transform: translateY(-50%) translateY(-20px);
-  }
+@media (max-width: 980px){
+  .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filters{ grid-template-columns: 1fr; }
+  .detail{ grid-template-columns: 1fr; }
 }
 
 /* Robot RopaShop - Icono flotante (visible siempre) */
@@ -799,9 +773,7 @@ input:focus, select:focus {
   }
 }
 
-/* ============================================
-   ROBOT MODAL - Galería en 2 columnas con 8 robots
-   ============================================ */
+/* Robot RopaShop - Modal */
 .robotModal {
   position: fixed;
   top: 0;
@@ -820,8 +792,8 @@ input:focus, select:focus {
   background: white;
   border-radius: 16px;
   padding: 25px;
-  max-width: 700px;
-  max-height: 95vh;
+  max-width: 500px;
+  max-height: 90vh;
   overflow-y: auto;
   position: relative;
   width: 100%;
@@ -851,69 +823,51 @@ input:focus, select:focus {
   text-align: center;
 }
 
-/* Galería en 3 columnas para 9 robots */
 .robotGallery {
   display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
-  gap: 16px;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 20px;
   justify-items: center;
-  max-width: 650px;
+  max-width: 450px;
   margin: 0 auto;
   width: 100%;
-  overflow: visible;
 }
 
 .robotItem {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 10px;
-  border-radius: 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  justify-content: center;
   width: 100%;
-  transition: transform 0.2s ease;
-}
-
-.robotItem:hover {
-  transform: scale(1.03);
+  max-width: 180px;
+  box-sizing: border-box;
 }
 
 .robotItem img {
-  width: 70px;
-  height: 70px;
+  width: 100%;
+  height: 150px;
   object-fit: contain;
+  border-radius: 8px;
 }
 
 .robotItem p {
-  margin: 0;
-  font-size: 12px;
-  color: var(--text);
-  font-weight: 600;
-  text-align: center;
-}
-
-.robotContactInfo {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #e2e8f0;
-  text-align: center;
-}
-
-.robotContactInfo h3 {
-  margin: 0 0 12px 0;
-  font-size: 18px;
-  color: var(--text);
-}
-
-.robotContactInfo p {
-  margin: 4px 0;
+  margin: 8px 0 0 0;
   font-size: 14px;
-  color: var(--muted);
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  width: 100%;
 }
 
-/* Estilos para los robots flotantes en los costados */
+.robotItem:last-child {
+  grid-column: span 2;
+}
+
+.robotItem:last-child img {
+  max-width: 50%;
+}
+
+/* Robot RopaShop - Estilos para el robot flotante */
 .robotRopaShop {
   position: fixed;
   left: 1%;
@@ -926,6 +880,7 @@ input:focus, select:focus {
   animation: float 3s ease-in-out infinite;
 }
 
+/* Robot RopaShop - Versión derecha para Orders */
 .robotRopaShopRight {
   position: fixed;
   right: 1%;
@@ -945,23 +900,5 @@ input:focus, select:focus {
   }
   50% {
     transform: translateY(-50%) translateY(-15px);
-  }
-}
-
-/* Responsive para el modal de robots */
-@media (max-width: 500px) {
-  .robotGallery {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px;
-  }
-  .robotItem img {
-    width: 55px;
-    height: 55px;
-  }
-  .robotItem p {
-    font-size: 10px;
-  }
-  .robotModalContent {
-    padding: 15px;
   }
 }

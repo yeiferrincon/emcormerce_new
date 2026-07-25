@@ -17,7 +17,7 @@ from app.models.user import User
 from app.services.cart_service import clear_cart, get_or_create_cart
 
 
-def create_order_from_cart(db: Session, *, user: User, shipping_address: str | None = None, shipping_phone: str | None = None) -> Order:
+def create_order_from_cart(db: Session, *, user: User) -> Order:
     # Convertir el carrito del usuario en una orden real y descontar stock.
     cart = get_or_create_cart(db, user=user)
     cart_items = list(
@@ -51,8 +51,8 @@ def create_order_from_cart(db: Session, *, user: User, shipping_address: str | N
         status=OrderStatus.paid,
         total_price=0,
         currency="COP",
-        shipping_address=shipping_address or user.address,
-        shipping_phone=shipping_phone or user.phone,
+        shipping_address=user.address,
+        shipping_phone=user.phone,
     )
     db.add(order)
     db.flush()

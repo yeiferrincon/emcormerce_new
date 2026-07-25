@@ -39,13 +39,13 @@ class OrderOut(BaseModel):
     # Forma de devolver una orden completa al cliente.
     id: int
     user_id: int
-    user_name: str | None = None
     status: str
     total_price: float
     currency: str
     shipping_address: str | None = None
     shipping_phone: str | None = None
     cancellation_comment: str | None = None
+    original_order_id: int | None = None
     created_at: datetime
     items: list[OrderItemOut]
 

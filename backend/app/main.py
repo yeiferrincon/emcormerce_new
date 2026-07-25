@@ -11,7 +11,7 @@ import os
 import time
 from pathlib import Path
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -26,7 +26,6 @@ from app.routers.auth_router import router as auth_router
 from app.routers.cart_router import router as cart_router
 from app.routers.order_router import router as order_router
 from app.routers.product_router import router as product_router
-from app.websocket_manager import manager
 
 import app.models  # noqa: F401
 
@@ -68,9 +67,8 @@ def asegurar_variantes_por_defecto() -> None:
         for producto in productos:
             if not producto.variants:
                 stock = int(producto.stock or 0)
-                # NO auto-incrementar stock al reiniciar
                 if stock <= 0:
-                    stock = 0
+                    stock = 1
                 producto.stock = stock
                 variante = ProductVariant(
                     product_id=producto.id,
@@ -82,8 +80,12 @@ def asegurar_variantes_por_defecto() -> None:
                 updated = True
             else:
                 total_variant_stock = sum(int(v.stock or 0) for v in producto.variants)
-                # NO reparar variantes con stock 0 automáticamente
-                if producto.stock != total_variant_stock:
+                if total_variant_stock == 0 and len(producto.variants) == 1:
+                    # Reparar variantes legacy creadas con stock 0 por defecto.
+                    producto.variants[0].stock = 1
+                    producto.stock = 1
+                    updated = True
+                elif producto.stock != total_variant_stock:
                     producto.stock = total_variant_stock
                     updated = True
         if updated:
@@ -150,16 +152,6 @@ async def registrar_peticiones(request, call_next):
 def revisar_salud() -> dict[str, str]:
     # Respuesta simple para comprobar si el backend está vivo.
     return {"status": "ok"}
-
-
-@app.websocket("/ws/{user_id}")
-async def websocket_endpoint(websocket: WebSocket, user_id: int):
-    await manager.connect(user_id, websocket)
-    try:
-        while True:
-            data = await websocket.receive_text()
-    except WebSocketDisconnect:
-        manager.disconnect(user_id, websocket)
 
 
 # Incluir todos los routers del proyecto.

@@ -15,24 +15,16 @@ from app.schemas.order_schema import OrderCreateOut, OrderOut, OrderItemOut
 from app.services.order_service import create_order_from_cart, get_order, list_orders
 from app.models.order import Order
 from app.models.order_item import OrderItem
-from app.websocket_manager import manager
 
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
 
 @router.post("", response_model=OrderCreateOut, status_code=201)
-def crear_pedido(
-    db: Session = Depends(get_db),
-    usuario=Depends(get_current_user),
-    shipping_address: str | None = Body(None),
-    shipping_phone: str | None = Body(None)
-) -> OrderCreateOut:
+def crear_pedido(db: Session = Depends(get_db), usuario=Depends(get_current_user)) -> OrderCreateOut:
     # Tomar el carrito actual del usuario y convertirlo en una orden.
     try:
-        pedido = create_order_from_cart(
-            db, user=usuario, shipping_address=shipping_address, shipping_phone=shipping_phone
-        )
+        pedido = create_order_from_cart(db, user=usuario)
         db.commit()
     except ValueError as exc:
         db.rollback()
@@ -47,13 +39,13 @@ def crear_pedido(
     order_dict = {
         "id": pedido.id,
         "user_id": pedido.user_id,
-        "user_name": pedido.user.name if pedido.user else None,
         "status": pedido.status,
         "total_price": float(pedido.total_price),
         "currency": pedido.currency,
         "shipping_address": pedido.shipping_address,
         "shipping_phone": pedido.shipping_phone,
         "cancellation_comment": pedido.cancellation_comment,
+        "original_order_id": pedido.original_order_id,
         "created_at": pedido.created_at,
         "items": [OrderItemOut.from_order_item(item) for item in pedido.items]
     }
@@ -67,12 +59,10 @@ def listar_pedidos(db: Session = Depends(get_db), usuario=Depends(get_current_us
         from app.models.user import UserRole
         
         if usuario.role == UserRole.admin:
-            # Admin: mostrar todos los pedidos con nombre de usuario
-            from app.models.user import User
+            # Admin: mostrar todos los pedidos
             orders = list(
                 db.execute(
                     select(Order)
-                    .join(User, Order.user_id == User.id)
                     .order_by(Order.created_at.desc())
                     .options(
                         joinedload(Order.items)
@@ -94,13 +84,13 @@ def listar_pedidos(db: Session = Depends(get_db), usuario=Depends(get_current_us
             order_dict = {
                 "id": order.id,
                 "user_id": order.user_id,
-                "user_name": order.user.name if order.user else None,
                 "status": order.status,
                 "total_price": float(order.total_price),
                 "currency": order.currency,
                 "shipping_address": order.shipping_address,
                 "shipping_phone": order.shipping_phone,
                 "cancellation_comment": order.cancellation_comment,
+                "original_order_id": order.original_order_id,
                 "created_at": order.created_at,
                 "items": [OrderItemOut.from_order_item(item) for item in order.items]
             }
@@ -122,7 +112,7 @@ def ver_pedido(order_id: int, db: Session = Depends(get_db), usuario=Depends(get
 
 
 @router.put("/{order_id}/status", response_model=OrderOut)
-async def actualizar_estado_pedido(
+def actualizar_estado_pedido(
     order_id: int,
     status: str = Body(..., embed=True),
     cancellation_comment: str | None = Body(None, embed=True),
@@ -144,52 +134,26 @@ async def actualizar_estado_pedido(
         if not pedido:
             raise HTTPException(status_code=404, detail="Order not found")
 
-        # Guardar estado anterior para verificar si se está cancelando
-        estado_anterior = pedido.status
         pedido.status = nuevo_status
         
-        # Si se cancela el pedido, devolver stock a las variantes
-        if nuevo_status == OrderStatus.cancelled and estado_anterior != OrderStatus.cancelled:
-            from sqlalchemy.orm import joinedload
-            pedido_con_items = db.query(Order).options(joinedload(Order.items).joinedload(OrderItem.variant)).filter(Order.id == order_id).first()
-            if pedido_con_items:
-                for item in pedido_con_items.items:
-                    if item.variant:
-                        item.variant.stock = (item.variant.stock or 0) + item.quantity
-                        # Actualizar stock del producto principal
-                        if item.variant.product:
-                            total_stock = sum(v.stock or 0 for v in item.variant.product.variants)
-                            item.variant.product.stock = total_stock
-        
-        # Si se cancela o entrega, guardar el comentario (número de guía para entregados)
-        if cancellation_comment:
+        # Si se cancela, guardar el comentario
+        if nuevo_status == OrderStatus.cancelled and cancellation_comment:
             pedido.cancellation_comment = cancellation_comment
         
         db.commit()
         db.refresh(pedido)
 
-        # Notificar al usuario del cambio de estado
-        await manager.broadcast_to_user(
-            pedido.user_id,
-            {
-                "type": "order_status_changed",
-                "order_id": pedido.id,
-                "status": pedido.status,
-                "cancellation_comment": pedido.cancellation_comment
-            }
-        )
-
         # Construir respuesta manualmente
         order_dict = {
             "id": pedido.id,
             "user_id": pedido.user_id,
-            "user_name": pedido.user.name if pedido.user else None,
             "status": pedido.status,
             "total_price": float(pedido.total_price),
             "currency": pedido.currency,
             "shipping_address": pedido.shipping_address,
             "shipping_phone": pedido.shipping_phone,
             "cancellation_comment": pedido.cancellation_comment,
+            "original_order_id": pedido.original_order_id,
             "created_at": pedido.created_at,
             "items": [OrderItemOut.from_order_item(item) for item in pedido.items]
         }
@@ -200,3 +164,121 @@ async def actualizar_estado_pedido(
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error al actualizar estado: {str(exc)}")
+
+
+@router.post("/{order_id}/duplicate", response_model=OrderOut)
+def duplicar_pedido(
+    order_id: int,
+    db: Session = Depends(get_db),
+    usuario=Depends(get_current_user)
+) -> OrderOut:
+    # Duplicar un pedido existente (solo el dueño del pedido)
+    try:
+        from app.models.order import Order
+        from app.models.order_item import OrderItem
+        from app.services.order_service import get_order
+
+        original_order = get_order(db, user=usuario, order_id=order_id)
+        if not original_order:
+            raise HTTPException(status_code=404, detail="Order not found")
+
+        # Verificar que el usuario sea el dueño del pedido o admin
+        from app.models.user import UserRole
+        if original_order.user_id != usuario.id and usuario.role != UserRole.admin:
+            raise HTTPException(
+                status_code=403,
+                detail="No tienes permiso para duplicar este pedido"
+            )
+
+        # Verificar que el pedido no haya sido duplicado anteriormente
+        if original_order.status == "duplicated":
+            raise HTTPException(
+                status_code=400,
+                detail="Este pedido ya ha sido duplicado"
+            )
+
+        # Crear nuevo pedido duplicando los items del original
+        from app.models.order import OrderStatus
+        from app.models.product_variant import ProductVariant
+
+        # Verificar stock disponible para todos los items
+        for item in original_order.items:
+            variant = db.get(ProductVariant, item.product_variant_id)
+            if not variant or variant.stock < item.quantity:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"No hay suficiente stock para {item.product_name}"
+                )
+
+        # Crear nuevo pedido
+        total = 0.0
+        new_order = Order(
+            user_id=usuario.id,
+            status=OrderStatus.paid,
+            total_price=0,
+            currency=original_order.currency,
+            shipping_address=original_order.shipping_address,
+            shipping_phone=original_order.shipping_phone,
+            original_order_id=original_order.id
+        )
+        db.add(new_order)
+        db.flush()
+
+        # Duplicar items SIN descontar stock (ya está reservado)
+        for item in original_order.items:
+            variant = db.get(ProductVariant, item.product_variant_id)
+
+            db.add(
+                OrderItem(
+                    order_id=new_order.id,
+                    product_id=variant.product_id,
+                    product_variant_id=item.product_variant_id,
+                    quantity=item.quantity,
+                    price=item.price
+                )
+            )
+            total += float(item.price) * item.quantity
+
+        new_order.total_price = round(total, 2)
+        
+        # Cambiar el estado del pedido original a "duplicated" y agregar comentario
+        from datetime import datetime
+        from app.models.order import OrderStatus
+        
+        original_order.status = OrderStatus.duplicated
+        
+        # Agregar comentario de duplicación manteniendo el comentario de cancelación original
+        duplication_comment = f"Duplicado el {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+        if original_order.cancellation_comment:
+            original_order.cancellation_comment = f"{original_order.cancellation_comment}. {duplication_comment}"
+        else:
+            original_order.cancellation_comment = duplication_comment
+        
+        db.commit()
+        db.refresh(new_order)
+
+        # Cargar items del nuevo pedido
+        new_order_with_items = get_order(db, user=usuario, order_id=new_order.id)
+
+        # Construir respuesta
+        order_dict = {
+            "id": new_order_with_items.id,
+            "user_id": new_order_with_items.user_id,
+            "status": new_order_with_items.status,
+            "total_price": float(new_order_with_items.total_price),
+            "currency": new_order_with_items.currency,
+            "shipping_address": new_order_with_items.shipping_address,
+            "shipping_phone": new_order_with_items.shipping_phone,
+            "cancellation_comment": new_order_with_items.cancellation_comment,
+            "original_order_id": new_order_with_items.original_order_id,
+            "created_at": new_order_with_items.created_at,
+            "items": [OrderItemOut.from_order_item(item) for item in new_order_with_items.items]
+        }
+        return OrderOut(**order_dict)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error al duplicar pedido: {str(exc)}")
+
