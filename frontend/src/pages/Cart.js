@@ -24,7 +24,9 @@ export default function Cart() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentStep, setPaymentStep] = useState(0); // 0: inicio, 1: seleccion metodo, 2: procesando, 3: completado
   const [paymentMethod, setPaymentMethod] = useState("");
-  const { token } = useAuth();
+  const [shippingAddress, setShippingAddress] = useState("");
+  const [shippingPhone, setShippingPhone] = useState("");
+  const { token, user, isAuthReady } = useAuth();
   const navigate = useNavigate();
 
   const subtotalLabel = useMemo(() => {
@@ -70,6 +72,9 @@ export default function Cart() {
   async function checkout() {
     setShowPaymentModal(true);
     setPaymentStep(0);
+    // Pre-llenar datos si el usuario ya los tiene
+    setShippingAddress(user?.address || "");
+    setShippingPhone(user?.phone || "");
   }
 
   async function processPayment() {
@@ -78,7 +83,15 @@ export default function Cart() {
     setLoading(true);
     setPaymentStep(2);
     try {
-      const response = await api.post("/orders");
+      console.log("Enviando pedido con datos de envío:", {
+        shipping_address: shippingAddress,
+        shipping_phone: shippingPhone
+      });
+      const response = await api.post("/orders", {
+        shipping_address: shippingAddress,
+        shipping_phone: shippingPhone
+      });
+      console.log("Respuesta del servidor:", response.data);
       setPaymentStep(3);
       setRobotState("success");
       setTimeout(() => {
@@ -86,6 +99,7 @@ export default function Cart() {
         navigate("/orders");
       }, 2000);
     } catch (e) {
+      console.error("Error al crear pedido:", e);
       setPaymentStep(1);
       setRobotState("error");
       const errorMessage = e?.response?.data?.detail || e?.message || "No se pudo crear el pedido.";
@@ -96,32 +110,37 @@ export default function Cart() {
   }
 
   function handlePaymentMethodSelect(method) {
+    if (!shippingAddress.trim() || !shippingPhone.trim()) {
+      setError("Por favor, completa la dirección de envío y el teléfono de contacto antes de continuar.");
+      return;
+    }
     setPaymentMethod(method);
     setPaymentStep(1);
   }
 
   useEffect(() => {
-    if (token) {
+    if (token && isAuthReady) {
       load();
     }
-  }, [token]);
+  }, [token, isAuthReady]);
 
   if (loading) return <div className="panel muted">Cargando...</div>;
 
   return (
     <div className="stack">
       {!robotState && <img src={robotImage} alt="Robot RopaShop" className="robotRopaShop" />}
-      <img
-        src={robotIcon}
-        alt="Robot Icon"
-        className="robotIconMobile"
-        onClick={() => setShowRobotModal(true)}
-        title="Conoce la mascota de nuestra compañía"
-      />
-      <h2>Carrito</h2>
-
+      {!robotState && (
+        <img
+          src={robotIcon}
+          alt="Robot Icon"
+          className="robotIconMobile"
+          onClick={() => setShowRobotModal(true)}
+          title="Conoce la mascota de nuestra compañía"
+        />
+      )}
+      
       {robotState && (
-        <div className="panel" style={{ textAlign: "center", padding: "40px" }}>
+        <div className="panel" style={{ textAlign: "center", padding: "40px", marginTop: "20px" }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
             <img
               src={robotState === "success" ? robotSuccess : robotError}
@@ -132,6 +151,13 @@ export default function Cart() {
           <p style={{ fontSize: "18px", fontWeight: "bold" }}>
             {robotState === "success" ? "¡Pedido creado exitosamente!" : "Error al crear el pedido"}
           </p>
+          {robotState === "success" && (
+            <div style={{ marginTop: "20px" }}>
+              <button className="btn" onClick={() => window.location.href = "/orders"}>
+                Ver mis pedidos
+              </button>
+            </div>
+          )}
           {robotState === "error" && (
             <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
               <button className="btn" onClick={() => { setRobotState(null); setError(""); }}>
@@ -144,6 +170,7 @@ export default function Cart() {
 
       {!robotState && (
         <>
+          <h2>Carrito</h2>
           {error && <div className="panel danger">{error}</div>}
 
           {cart?.items?.length ? (
@@ -221,6 +248,41 @@ export default function Cart() {
             <div className="modalBody">
               {paymentStep === 0 && (
                 <div>
+                  <div style={{ marginBottom: "20px" }}>
+                    <h4>Información de Envío</h4>
+                    <div style={{ marginTop: "10px" }}>
+                      <label style={{ display: "block", marginBottom: "5px", fontSize: "14px" }}>Dirección de envío:</label>
+                      <textarea
+                        value={shippingAddress}
+                        onChange={(e) => setShippingAddress(e.target.value)}
+                        placeholder="Ingresa tu dirección completa"
+                        style={{
+                          width: "100%",
+                          padding: "10px",
+                          border: "1px solid #e2e8f0",
+                          borderRadius: "6px",
+                          minHeight: "60px",
+                          fontSize: "14px"
+                        }}
+                      />
+                    </div>
+                    <div style={{ marginTop: "10px" }}>
+                      <label style={{ display: "block", marginBottom: "5px", fontSize: "14px" }}>Teléfono de contacto:</label>
+                      <input
+                        type="tel"
+                        value={shippingPhone}
+                        onChange={(e) => setShippingPhone(e.target.value)}
+                        placeholder="Ingresa tu número de teléfono"
+                        style={{
+                          width: "100%",
+                          padding: "10px",
+                          border: "1px solid #e2e8f0",
+                          borderRadius: "6px",
+                          fontSize: "14px"
+                        }}
+                      />
+                    </div>
+                  </div>
                   <div style={{ marginBottom: "20px" }}>
                     <h4>Resumen del Pedido</h4>
                     <div style={{ background: "#f8fafc", padding: "15px", borderRadius: "8px", marginTop: "10px" }}>
@@ -304,6 +366,19 @@ export default function Cart() {
               )}
               {paymentStep === 1 && (
                 <div>
+                  {error && (
+                    <div style={{ 
+                      background: "#fee2e2", 
+                      border: "1px solid #fecaca", 
+                      borderRadius: "6px", 
+                      padding: "10px", 
+                      marginBottom: "15px",
+                      color: "#dc2626",
+                      fontSize: "14px"
+                    }}>
+                      {error}
+                    </div>
+                  )}
                   <div style={{ marginBottom: "20px" }}>
                     <h4>Pago con {paymentMethod === "pse" ? "PSE" : paymentMethod === "transferencia" ? "Transferencia Bancaria" : "Tarjeta"}</h4>
                     <div style={{ background: "#f8fafc", padding: "15px", borderRadius: "8px", marginTop: "10px" }}>

@@ -1,9 +1,22 @@
-.env
-**/.env
+# Entornos virtuales
+env/
+venv/
+.venv/
+**/env/
+**/venv/
+**/.venv/
+
+# Caché de Python
 **/__pycache__/
 **/*.pyc
+
+# Variables de entorno
+.env
+**/.env
+
+# Backend
 backend/uploads/
-backend/.venv/
+
+# Frontend
 frontend/node_modules/
 frontend/dist/
-
