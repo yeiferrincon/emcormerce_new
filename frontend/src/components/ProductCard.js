@@ -21,7 +21,9 @@ export default function ProductCard({ p, onEditVariants, onDelete }) {
           <span className="price">
             {new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP" }).format(p.price)}
           </span>
-          <span className="muted">{p.stock} stock</span>
+          <span className={`muted ${p.stock === 0 ? "danger" : ""}`}>
+            {p.stock === 0 ? "Agotado" : `${p.stock} stock`}
+          </span>
         </div>
         {isAdmin && (
           <div className="cardActions">

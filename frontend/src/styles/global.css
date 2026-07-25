@@ -732,6 +732,22 @@ input:focus, select:focus {
    ============================================ */
 
 /* Robot en página de login/registro */
+.auth {
+  position: relative;
+  min-height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.authCard {
+  width: 100%;
+  max-width: 420px;
+  z-index: 20;
+  position: relative;
+}
+
 .authRobot {
   position: fixed;
   width: 280px;
@@ -761,6 +777,37 @@ input:focus, select:focus {
   }
   .robotRopaShopRight {
     display: none;
+  }
+}
+
+/* Responsive para login/registro */
+@media (min-width: 1470px) and (max-width: 1920px) {
+  .authRobot {
+    width: 300px;
+    height: 300px;
+    left: 70%;
+  }
+}
+
+@media (min-width: 1921px) {
+  .authRobot {
+    width: 350px;
+    height: 350px;
+    left: 65%;
+  }
+  
+  .authCard {
+    max-width: 480px;
+  }
+}
+
+@media (max-width: 768px) {
+  .auth {
+    padding: 16px;
+  }
+  
+  .authCard {
+    max-width: 100%;
   }
 }
 
