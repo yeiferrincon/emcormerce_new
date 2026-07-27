@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import logo from "../img/logo.webp";
 
 export default function Navbar({ ui }) {
   const { token, user, logout } = useAuth();
@@ -9,7 +10,9 @@ export default function Navbar({ ui }) {
     <header className="nav">
       <div className="container navInner">
         <Link to="/" className="brand">
-          <span className="brandMark">RS</span>
+          <span className="brandMark">
+            <img src={logo} alt="RopaShop" className="logo" />
+          </span>
           <span className="brandName">RopaShop</span>
         </Link>
 
