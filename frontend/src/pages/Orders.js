@@ -12,24 +12,26 @@ import robot8 from "../Img/RobotRopaShop_8_actualizar contraseña.png";
 import robotSuccess from "../Img/RobotRopaShop_2_Con_Exito.png";
 import robotError from "../Img/RobotRopaShop_5_Con_Error.png";
 import robotThinking from "../Img/RobotRopaShop_3_Pensando.png";
+import robotPedidoCamino from "../Img/robotRopaShop_pedido_Camino.png";
 
 export default function Orders() {
-  const { user } = useAuth();
+  const { user, isAuthReady } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showRobotModal, setShowRobotModal] = useState(false);
   const [mainRobot, setMainRobot] = useState(robotThinking);
   const [updatingStatus, setUpdatingStatus] = useState(null);
-  const [cancellationComment, setCancellationComment] = useState({});
+  const [comment, setComment] = useState({});
   const [showCommentInput, setShowCommentInput] = useState({});
+  const [pendingStatus, setPendingStatus] = useState({});
 
   const fmt = useMemo(() => new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP" }), []);
   const isAdmin = user?.role === "admin";
 
   // Función para obtener el paso actual del proceso según el estado
   const getProcessStep = (status) => {
-    const steps = ["paid", "processing", "shipped", "delivered"];
+    const steps = ["paid", "delivered"];
     const stepIndex = steps.indexOf(status);
     return stepIndex >= 0 ? stepIndex : 0;
   };
@@ -39,11 +41,8 @@ export default function Orders() {
     const labels = {
       pending: "Pendiente",
       paid: "Pagado",
-      processing: "Despachando",
       cancelled: "Cancelado",
-      shipped: "Enviado",
       delivered: "Entregado",
-      duplicated: "Duplicado",
     };
     return labels[status] || status;
   };
@@ -54,9 +53,7 @@ export default function Orders() {
       pending: "#f59e0b",
       paid: "#3b82f6",
       cancelled: "#ef4444",
-      shipped: "#8b5cf6",
       delivered: "#10b981",
-      duplicated: "#6366f1",
     };
     return colors[status] || "#64748b";
   };
@@ -94,12 +91,12 @@ export default function Orders() {
     }
   }
 
-  async function updateOrderStatus(orderId, newStatus, cancellationComment = null) {
+  async function updateOrderStatus(orderId, newStatus, comment = null) {
     setUpdatingStatus(orderId);
     try {
       const payload = { status: newStatus };
-      if (newStatus === 'cancelled' && cancellationComment) {
-        payload.cancellation_comment = cancellationComment;
+      if (comment) {
+        payload.cancellation_comment = comment;
       }
       const res = await api.put(`/orders/${orderId}/status`, payload);
       // Actualizar el pedido en la lista local
@@ -111,31 +108,58 @@ export default function Orders() {
     }
   }
 
-  async function duplicateOrder(orderId) {
-    setUpdatingStatus(orderId);
-    try {
-      const res = await api.post(`/orders/${orderId}/duplicate`);
-      // Actualizar el estado usando el valor más reciente
-      setItems(prevItems => {
-        // Actualizar el pedido duplicado
-        const updatedItems = prevItems.map(item => 
-          item.id === orderId ? { ...item, status: 'duplicated' } : item
-        );
-        // Agregar el nuevo pedido al inicio
-        return [res.data, ...updatedItems];
-      });
-    } catch (e) {
-      setError("No se pudo duplicar el pedido.");
-    } finally {
-      setUpdatingStatus(null);
-    }
-  }
 
   useEffect(() => {
-    if (user) {
+    if (user && isAuthReady) {
       load();
     }
-  }, [user]);
+  }, [user, isAuthReady]);
+
+  useEffect(() => {
+    if (user && isAuthReady) {
+      // Conectar WebSocket para actualizaciones en tiempo real
+      try {
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsHost = window.location.hostname === 'localhost' ? 'localhost:8000' : window.location.host;
+        const wsUrl = `${wsProtocol}//${wsHost}/ws/${user.id}`;
+        
+        const ws = new WebSocket(wsUrl);
+        
+        ws.onopen = () => {
+          console.log('WebSocket connected successfully');
+        };
+        
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'order_status_changed') {
+              // Recargar pedidos cuando el admin cambie el estado
+              load();
+            }
+          } catch (e) {
+            console.error('Error parsing WebSocket message:', e);
+          }
+        };
+        
+        ws.onerror = (error) => {
+          // Silenciar errores de WebSocket - la app funciona sin ellos
+          console.debug('WebSocket connection issue (non-critical):', error);
+        };
+        
+        ws.onclose = (event) => {
+          console.log('WebSocket connection closed:', event.code, event.reason);
+        };
+        
+        return () => {
+          if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+            ws.close();
+          }
+        };
+      } catch (e) {
+        console.debug('Failed to initialize WebSocket (non-critical):', e);
+      }
+    }
+  }, [user, isAuthReady]);
 
   if (loading) return <div className="panel muted">Cargando...</div>;
   if (error) return <div className="panel danger">{error}</div>;
@@ -147,6 +171,25 @@ export default function Orders() {
         alt="Robot Estado"
         className="robotRopaShopRight"
       />
+      {(items.some(o => o.status === 'paid' || o.status === 'delivered')) && (
+        <img
+          src={robotPedidoCamino}
+          alt="Pedido en camino"
+          className="robotRopaShopLeft"
+          style={{
+            position: "fixed",
+            left: "2%",
+            top: "55%",
+            transform: "translateY(-50%)",
+            width: "320px",
+            height: "320px",
+            objectFit: "contain",
+            zIndex: "10",
+            transition: "all 0.3s ease",
+            animation: "float 3s ease-in-out infinite"
+          }}
+        />
+      )}
       <img
         src={robotIcon}
         alt="Robot Icon"
@@ -192,6 +235,16 @@ export default function Orders() {
                 <img src={robot8} alt="Robot 8 - Actualizar Contraseña" />
                 <p>Actualizar Contraseña</p>
               </div>
+              <div className="robotItem">
+                <img src={robotPedidoCamino} alt="Robot 9 - Pedido en Camino" onError={(e) => { console.error('Error cargando imagen pedido camino:', e); e.target.style.display = 'none'; }} />
+                <p>Pedido en Camino</p>
+              </div>
+            </div>
+            <div className="robotContactInfo">
+              <h3>Contacto</h3>
+              <p>📍 Colombia</p>
+              <p>📞 +57 300 123 4567</p>
+              <p>✉ contacto@ropashop.com</p>
             </div>
           </div>
         </div>
@@ -205,19 +258,49 @@ export default function Orders() {
                 <strong style={{ fontSize: "18px" }}>Pedido #{o.id}</strong>
                 <span className="chip" style={{ background: getStatusColor(o.status), color: "white" }}>{getStatusLabel(o.status)}</span>
               </div>
+              {(o.shipping_address || o.shipping_phone || o.user_name) && (
+                <div style={{ 
+                  marginBottom: "12px", 
+                  padding: "10px", 
+                  background: "#f8fafc", 
+                  border: "1px solid #e2e8f0", 
+                  borderRadius: "6px",
+                  fontSize: "13px"
+                }}>
+                  <div style={{ fontWeight: "600", marginBottom: "6px", color: "#475569" }}>
+                    📦 Información de Envío:
+                  </div>
+                  {o.user_name && (
+                    <div style={{ marginBottom: "4px" }}>
+                      <span style={{ color: "#64748b" }}>Nombre:</span> {o.user_name}
+                    </div>
+                  )}
+                  {o.shipping_address && (
+                    <div style={{ marginBottom: "4px" }}>
+                      <span style={{ color: "#64748b" }}>Dirección:</span> {o.shipping_address}
+                    </div>
+                  )}
+                  {o.shipping_phone && (
+                    <div>
+                      <span style={{ color: "#64748b" }}>Teléfono:</span> {o.shipping_phone}
+                    </div>
+                  )}
+                </div>
+              )}
               {isAdmin && (
                 <div style={{ marginBottom: "12px" }}>
                   <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                    {["paid", "processing", "shipped", "delivered", "cancelled"].map((status) => {
-                      // No mostrar botón de cancelar si el pedido ya está entregado o duplicado
-                      if (status === 'cancelled' && (o.status === 'delivered' || o.status === 'duplicated')) {
+                    {["paid", "delivered", "cancelled"].map((status) => {
+                      // No mostrar botón de cancelar si el pedido ya está entregado
+                      if (status === 'cancelled' && o.status === 'delivered') {
                         return null;
                       }
                       return (
                         <button
                           key={status}
                           onClick={() => {
-                            if (status === 'cancelled') {
+                            if (status === 'cancelled' || status === 'delivered') {
+                              setPendingStatus({ ...pendingStatus, [o.id]: status });
                               setShowCommentInput({ ...showCommentInput, [o.id]: true });
                             } else {
                               updateOrderStatus(o.id, status);
@@ -242,9 +325,9 @@ export default function Orders() {
                   {showCommentInput[o.id] && (
                     <div style={{ marginTop: "8px" }}>
                       <textarea
-                        placeholder="Comentario de cancelación..."
-                        value={cancellationComment[o.id] || ''}
-                        onChange={(e) => setCancellationComment({ ...cancellationComment, [o.id]: e.target.value })}
+                        placeholder={pendingStatus[o.id] === 'delivered' ? "Número de guía de envío..." : "Comentario de cancelación..."}
+                        value={comment[o.id] || ''}
+                        onChange={(e) => setComment({ ...comment, [o.id]: e.target.value })}
                         style={{
                           width: "100%",
                           padding: "8px",
@@ -257,16 +340,20 @@ export default function Orders() {
                       <div style={{ display: "flex", gap: "8px" }}>
                         <button
                           onClick={() => {
-                            updateOrderStatus(o.id, 'cancelled', cancellationComment[o.id]);
+                            updateOrderStatus(o.id, pendingStatus[o.id], comment[o.id]);
                             setShowCommentInput({ ...showCommentInput, [o.id]: false });
+                            setPendingStatus({ ...pendingStatus, [o.id]: null });
                           }}
                           className="btn"
-                          style={{ background: "#ef4444", color: "white" }}
+                          style={{ background: pendingStatus[o.id] === 'delivered' ? "#10b981" : "#ef4444", color: "white" }}
                         >
-                          Confirmar Cancelación
+                          {pendingStatus[o.id] === 'delivered' ? 'Confirmar Entrega' : 'Confirmar Cancelación'}
                         </button>
                         <button
-                          onClick={() => setShowCommentInput({ ...showCommentInput, [o.id]: false })}
+                          onClick={() => {
+                            setShowCommentInput({ ...showCommentInput, [o.id]: false });
+                            setPendingStatus({ ...pendingStatus, [o.id]: null });
+                          }}
                           className="btn ghost"
                         >
                           Cancelar
@@ -281,8 +368,31 @@ export default function Orders() {
                 <strong style={{ fontSize: "20px", color: "#10b981" }}>{fmt.format(o.total_price)}</strong>
               </div>
               
-              {/* Mostrar comentario de cancelación si existe */}
-              {o.status === 'cancelled' && o.cancellation_comment && (
+              {/* Mostrar mensaje de cancelación específico para usuarios */}
+              {o.status === 'cancelled' && !isAdmin && (
+                <div style={{
+                  marginBottom: "12px",
+                  padding: "16px",
+                  background: "#fef2f2",
+                  border: "1px solid #fecaca",
+                  borderRadius: "6px",
+                  fontSize: "14px"
+                }}>
+                  <strong style={{ color: "#dc2626", fontSize: "16px" }}>Motivo de la cancelación:</strong>
+                  <p style={{ margin: "8px 0 0 0", color: "#991b1b", lineHeight: "1.6" }}>
+                    Su pedido ha sido cancelado debido a que no fue posible confirmar el pago correspondiente dentro del tiempo establecido para el despacho.
+                  </p>
+                  <p style={{ margin: "8px 0 0 0", color: "#991b1b", lineHeight: "1.6" }}>
+                    En caso de que el pago sí haya sido realizado, el valor será reembolsado al mismo medio de pago en un plazo de hasta 20 días hábiles.
+                  </p>
+                  <p style={{ margin: "8px 0 0 0", color: "#991b1b", lineHeight: "1.6" }}>
+                    Si tiene alguna inquietud o requiere más información, puede comunicarse con nuestro equipo de atención al cliente al <strong>555 555 555</strong> o escribir al correo <strong>RopaShop@gmail.com</strong>.
+                  </p>
+                </div>
+              )}
+
+              {/* Mostrar comentario de cancelación para admin */}
+              {o.status === 'cancelled' && isAdmin && o.cancellation_comment && (
                 <div style={{
                   marginBottom: "12px",
                   padding: "8px",
@@ -291,70 +401,59 @@ export default function Orders() {
                   borderRadius: "4px",
                   fontSize: "14px"
                 }}>
-                  <strong style={{ color: "#dc2626" }}>Motivo de cancelación:</strong>
+                  <strong style={{ color: "#dc2626" }}>Comentario de cancelación:</strong>
                   <p style={{ margin: "4px 0 0 0", color: "#991b1b" }}>{o.cancellation_comment}</p>
                 </div>
               )}
 
-              {/* Mostrar comentario en pedidos duplicados */}
-              {o.status === 'duplicated' && o.cancellation_comment && (
+
+              {/* Mostrar número de guía para pedidos entregados */}
+              {o.status === 'delivered' && (
                 <div style={{
                   marginBottom: "12px",
-                  padding: "8px",
-                  background: "#e0e7ff",
-                  border: "1px solid #c7d2fe",
+                  padding: "12px",
+                  background: "#ecfdf5",
+                  border: "1px solid #a7f3d0",
                   borderRadius: "4px",
                   fontSize: "14px"
                 }}>
-                  <strong style={{ color: "#4338ca" }}>Comentario:</strong>
-                  <p style={{ margin: "4px 0 0 0", color: "#3730a3" }}>{o.cancellation_comment}</p>
+                  <div style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
+                    <span style={{ fontSize: "20px", marginRight: "8px" }}>✅</span>
+                    <strong style={{ color: "#059669" }}>¡Tu pedido ha sido despachado con éxito!</strong>
+                  </div>
+                  <p style={{ margin: "4px 0 0 0", color: "#065f46" }}>
+                    Tu pedido ya fue enviado y está en camino a la dirección: <strong>{o.shipping_address}</strong>
+                  </p>
+                  {o.cancellation_comment && (
+                    <div style={{ marginTop: "8px", padding: "8px", background: "#d1fae5", borderRadius: "4px" }}>
+                      <strong style={{ color: "#047857" }}>Número de guía para rastreo:</strong>
+                      <div style={{ 
+                        marginTop: "4px", 
+                        fontSize: "16px", 
+                        fontWeight: "bold", 
+                        color: "#065f46",
+                        fontFamily: "monospace"
+                      }}>
+                        #{o.cancellation_comment}
+                      </div>
+                    </div>
+                  )}
+                  <p style={{ margin: "8px 0 0 0", color: "#065f46", fontSize: "13px" }}>
+                    Utiliza este número para consultar el estado de tu envío en la página de la transportadora Enca24
+                  </p>
+                  <p style={{ margin: "4px 0 0 0", color: "#047857", fontWeight: "600" }}>
+                    ¡Gracias por tu compra!
+                  </p>
                 </div>
               )}
 
-              {/* Botón de duplicación para pedidos cancelados */}
-              {o.status === 'cancelled' && (
-                <div style={{ marginBottom: "12px" }}>
-                  <button
-                    onClick={() => duplicateOrder(o.id)}
-                    disabled={updatingStatus === o.id}
-                    className="btn"
-                    style={{
-                      background: "#3b82f6",
-                      color: "white",
-                      padding: "8px 16px",
-                      fontSize: "14px",
-                      opacity: updatingStatus === o.id ? 0.5 : 1
-                    }}
-                  >
-                    {updatingStatus === o.id ? "Duplicando..." : "Duplicar pedido"}
-                  </button>
-                </div>
-              )}
 
-              {/* Indicador para pedidos duplicados */}
-              {o.status === 'duplicated' && (
-                <div style={{ marginBottom: "12px" }}>
-                  <span style={{ fontSize: "13px", color: "#6366f1", fontWeight: "600" }}>
-                    ✓ Este pedido fue duplicado
-                  </span>
-                </div>
-              )}
-
-              {/* Mostrar referencia al pedido original en pedidos duplicados */}
-              {o.original_order_id && (
-                <div style={{ marginBottom: "12px" }}>
-                  <span style={{ fontSize: "13px", color: "#64748b" }}>
-                    (Duplicado del pedido #{o.original_order_id})
-                  </span>
-                </div>
-              )}
-              
               {/* Timeline del proceso */}
-              {o.status !== 'cancelled' && o.status !== 'duplicated' && (
+              {o.status !== 'cancelled' && (
                 <div style={{ marginBottom: "16px" }}>
                   <div style={{ fontSize: "14px", fontWeight: "600", marginBottom: "8px" }}>Estado del pedido:</div>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    {["paid", "processing", "shipped", "delivered"].map((step, idx) => {
+                    {["paid", "delivered"].map((step, idx) => {
                       const currentStep = getProcessStep(o.status);
                       const isCompleted = idx < currentStep;
                       const isActive = idx === currentStep;

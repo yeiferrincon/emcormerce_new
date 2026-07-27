@@ -143,6 +143,9 @@ def eliminar_producto(product_id: int, db: Session = Depends(get_db)) -> Respons
     try:
         product_service.delete_product(db, producto)
         db.commit()
+    except ValueError as exc:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         db.rollback()
         raise HTTPException(status_code=400, detail="Product could not be deleted") from exc
@@ -190,6 +193,9 @@ def eliminar_variante(variant_id: int, db: Session = Depends(get_db)) -> Respons
     try:
         product_service.delete_variant(db, variante)
         db.commit()
+    except ValueError as exc:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         db.rollback()
         raise HTTPException(status_code=400, detail="Variant could not be deleted") from exc
