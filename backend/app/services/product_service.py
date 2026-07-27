@@ -192,32 +192,21 @@ def get_or_create_default_variant(db: Session, *, product_id: int) -> int:
 
 
 def delete_product(db: Session, product: Product) -> None:
-    # Eliminar el producto de la base de datos.
-    # Primero verificar si tiene pedidos asociados
-    from app.models.order_item import OrderItem
-    from app.models.cart_item import CartItem
+    # Soft-delete: no eliminar la fila ni la imagen.
+    # Marcar el producto y sus variantes como sin stock y añadir
+    # un mensaje visible al cliente. De esta forma el producto
+    # seguirá existiendo en la BD pero no podrá agregarse al carrito.
+    product.stock = 0
+    for variante in product.variants:
+        variante.stock = 0
 
-    # Verificar si el producto tiene pedidos
-    order_items = db.execute(
-        select(OrderItem).where(OrderItem.product_id == product.id)
-    ).scalar_one_or_none()
+    nota = "Agotado"
+    if product.description:
+        if nota not in product.description:
+            product.description = f"{product.description.rstrip()}\n\n{nota}"
+    else:
+        product.description = nota
 
-    if order_items:
-        raise ValueError(
-            "Este producto ya tiene unidades vendidas y no se puede eliminar. "
-            "Para ocultarlo, establece el stock en 0."
-        )
-
-    # Eliminar cart_items relacionados
-    db.execute(db.delete(CartItem).where(
-        CartItem.product_id == product.id))
-
-    # Eliminar variantes (cascade ya está configurado)
-    for variant in product.variants:
-        db.delete(variant)
-
-    # Finalmente eliminar el producto
-    db.delete(product)
     db.flush()
 
 

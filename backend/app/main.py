@@ -14,6 +14,7 @@ from pathlib import Path
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 
 from app.config.database import Base, SessionLocal, engine
 from app.config.settings import settings
@@ -95,10 +96,58 @@ def asegurar_variantes_por_defecto() -> None:
         db.close()
 
 
+def asegurar_columnas_orders() -> None:
+    # Asegurar que las columnas opcionales de pedidos y detalles de pedido existan en esquemas antiguos.
+    try:
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    "ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancellation_comment VARCHAR(1000);"
+                )
+            )
+            conn.execute(
+                text(
+                    "ALTER TABLE orders ADD COLUMN IF NOT EXISTS original_order_id INT;"
+                )
+            )
+            conn.execute(
+                text(
+                    "ALTER TABLE order_items ADD COLUMN IF NOT EXISTS product_id INT;"
+                )
+            )
+            conn.execute(
+                text(
+                    "UPDATE order_items SET product_id = pv.product_id "
+                    "FROM product_variants pv "
+                    "WHERE order_items.product_id IS NULL AND order_items.product_variant_id = pv.id;"
+                )
+            )
+            conn.execute(
+                text(
+                    "DO $$ BEGIN "
+                    "IF NOT EXISTS (SELECT 1 FROM pg_constraint c "
+                    "JOIN pg_class t ON c.conrelid = t.oid "
+                    "WHERE t.relname = 'order_items' AND c.conname = 'fk_order_items_product_id') THEN "
+                    "ALTER TABLE order_items ADD CONSTRAINT fk_order_items_product_id FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE RESTRICT; "
+                    "END IF; END $$;"
+                )
+            )
+            conn.execute(
+                text(
+                    "ALTER TABLE order_items ALTER COLUMN product_id SET NOT NULL;"
+                )
+            )
+    except Exception:
+        logging.getLogger("app.main").warning(
+            "No se pudieron asegurar las columnas de orders/order_items; puede que ya existan o la DB no permita ALTER TABLE."
+        )
+
+
 # Crear las tablas al iniciar la aplicación.
 Base.metadata.create_all(bind=engine)
 asegurar_categorias_por_defecto()
 asegurar_variantes_por_defecto()
+asegurar_columnas_orders()
 
 
 def _configurar_logs() -> None:

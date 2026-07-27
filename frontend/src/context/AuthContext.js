@@ -19,16 +19,29 @@ export function AuthProvider({ children }) {
   console.log("AuthProvider - Token en localStorage:", localStorage.getItem("token"));
 
   useEffect(() => {
+    // Asegurar que el header Authorization del API siempre refleje el token actual.
     setAuthToken(token || "");
-    if (token) localStorage.setItem("token", token);
-    else localStorage.removeItem("token");
-    setIsAuthReady(true);
+    if (token) {
+      localStorage.setItem("token", token);
+    } else {
+      localStorage.removeItem("token");
+    }
   }, [token]);
 
   useEffect(() => {
-    if (user) localStorage.setItem("user", JSON.stringify(user));
-    else localStorage.removeItem("user");
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
   }, [user]);
+
+  useEffect(() => {
+    // Si no hay token, crear sesión de invitado automáticamente.
+    if (!token) {
+      createGuestSession();
+    }
+  }, [token]);
 
   async function createGuestSession() {
     try {

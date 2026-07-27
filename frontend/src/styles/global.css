@@ -753,7 +753,8 @@ input:focus, select:focus {
   width: 280px;
   height: 280px;
   object-fit: contain;
-  z-index: 10;
+  z-index: 1;
+  pointer-events: none;
   transition: all 0.3s ease;
   top: 40%;
   transform: translateY(-50%);
@@ -766,6 +767,17 @@ input:focus, select:focus {
 .authRobotright {
   left: 65%;
 }
+
+/* Ocultar robot en pantallas pequeñas */
+@media (max-width: 900px) {
+  .authRobot {
+    display: none;
+  }
+}
+
+
+.footer{ border-top: 1px solid var(--line); padding: 18px 0; background: rgba(11,15,20,.45); backdrop-filter: blur(10px); }
+.footerInner{ display:flex; justify-content:space-between; align-items:center; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
 
 /* Ocultar robot en pantallas pequeñas */
 @media (max-width: 1469px) {

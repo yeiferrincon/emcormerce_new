@@ -25,6 +25,14 @@ export default function ProductCard({ p, onEditVariants, onDelete }) {
             {p.stock === 0 ? "Agotado" : `${p.stock} stock`}
           </span>
         </div>
+        {/* Mostrar mensaje inmediato si no hay stock */}
+        {((p.stock || 0) <= 0) ? (
+          <div className="danger" style={{ marginTop: 8 }}>
+            {p.description && String(p.description).includes("Agotado")
+              ? "Agotado"
+              : "Agotado."}
+          </div>
+        ) : null}
         {isAdmin && (
           <div className="cardActions">
             <button className="btn small" onClick={() => onEditVariants && onEditVariants(p)}>
