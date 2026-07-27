@@ -168,7 +168,30 @@ main.container { flex: 1; padding: 18px 0 40px;}
   border: 1px solid rgba(148,163,184,.22);
   border-radius: var(--radius);
   padding: 20px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow);  
+  gap: 15px;
+  width: 100%;
+}
+
+.cartpanel{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.cartThumb {
+  width: 250px;
+  height: 250px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.cartThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .homeHero {
@@ -846,23 +869,35 @@ input:focus, select:focus {
   pointer-events: none;
 }
 
-.authRobotleft {
-  left: 65%;
+.robotRopaShopLeft {
+  position: fixed;
+  left: -1%;
+  top: 55%;
+  transform: translateY(-50%);
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
+  z-index: 10;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  animation: float 3s ease-in-out infinite;
 }
 
 .authRobotright {
-  left: 65%;
+  position: fixed;
+  right: 20px;
+  left: auto;
+  top: 55%;
+  transform: translateY(-50%);
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
+  z-index: 10;
+  pointer-events: none;
 }
 
-/* Ajuste responsivo para robots flotantes */
-@media (max-width: 500px) {
-  .robotRopaShop,
-  .robotRopaShopLeft,
-  .robotRopaShopRight,
-  .authRobot {
-    width: 120px;
-  }
-}
+
+/*pantallas medianas: reducir tama;o*/
 
 @media (max-width: 1200px) {
   .robotRopaShop,
@@ -873,6 +908,7 @@ input:focus, select:focus {
   }
 }
 
+/*moviles: desaparecer*/
 @media (max-width: 768px) {
   .robotRopaShop,
   .robotRopaShopLeft,
@@ -1051,7 +1087,7 @@ input:focus, select:focus {
 /* Estilos para los robots flotantes en los costados */
 .robotRopaShop {
   position: fixed;
-  left: 1%;
+  left: 0%;
   top: 50%;
   transform: translateY(-50%);
   width: clamp(120px, 12vw, 220px);
@@ -1064,7 +1100,7 @@ input:focus, select:focus {
 
 .robotRopaShopRight {
   position: fixed;
-  right: 1%;
+  right: 0%;
   top: 50%;
   transform: translateY(-50%) scaleX(-1);
   width: clamp(120px, 12vw, 220px);
@@ -1106,7 +1142,8 @@ input:focus, select:focus {
 @media (max-width: 1400px) {
   .authRobot,
   .robotRopaShop,
-  .robotRopaShopRight {
+  .robotRopaShopRight,
+  .robotRopaShopLeft{
     display: none !important;
   }
 }
