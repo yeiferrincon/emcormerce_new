@@ -36,6 +36,9 @@ export default function Cart() {
     setLoading(true);
     setError("");
     try {
+      if (!token) {
+        await createGuestSession();
+      }
       const res = await api.get("/cart");
       setCart(res.data);
     } catch {
@@ -78,6 +81,9 @@ export default function Cart() {
     setLoading(true);
     setPaymentStep(2);
     try {
+      if (!token) {
+        await createGuestSession();
+      }
       const response = await api.post("/orders");
       setPaymentStep(3);
       setRobotState("success");

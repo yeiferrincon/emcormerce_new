@@ -192,8 +192,21 @@ def get_or_create_default_variant(db: Session, *, product_id: int) -> int:
 
 
 def delete_product(db: Session, product: Product) -> None:
-    # Eliminar el producto de la base de datos.
-    db.delete(product)
+    # Soft-delete: no eliminar la fila ni la imagen.
+    # Marcar el producto y sus variantes como sin stock y añadir
+    # un mensaje visible al cliente. De esta forma el producto
+    # seguirá existiendo en la BD pero no podrá agregarse al carrito.
+    product.stock = 0
+    for variante in product.variants:
+        variante.stock = 0
+
+    nota = "Agotado"
+    if product.description:
+        if nota not in product.description:
+            product.description = f"{product.description.rstrip()}\n\n{nota}"
+    else:
+        product.description = nota
+
     db.flush()
 
 
