@@ -19,6 +19,7 @@ class OrderStatus(str, enum.Enum):
     # Estados posibles de una orden.
     pending = "pending"
     paid = "paid"
+    shipped = "shipped"
     delivered = "delivered"
     cancelled = "cancelled"
 

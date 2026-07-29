@@ -118,31 +118,46 @@ export default function Orders() {
   useEffect(() => {
     if (user && isAuthReady) {
       // Conectar WebSocket para actualizaciones en tiempo real
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsHost = window.location.hostname === 'localhost' ? 'localhost:8000' : window.location.host;
-      const wsUrl = `${wsProtocol}//${wsHost}/ws/${user.id}`;
-      
-      const ws = new WebSocket(wsUrl);
-      
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === 'order_status_changed') {
-          // Recargar pedidos cuando el admin cambie el estado
-          load();
-        }
-      };
-      
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
-      
-      ws.onclose = () => {
-        console.log('WebSocket connection closed');
-      };
-      
-      return () => {
-        ws.close();
-      };
+      try {
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsHost = window.location.hostname === 'localhost' ? 'localhost:8000' : window.location.host;
+        const wsUrl = `${wsProtocol}//${wsHost}/ws/${user.id}`;
+        
+        const ws = new WebSocket(wsUrl);
+        
+        ws.onopen = () => {
+          console.log('WebSocket connected successfully');
+        };
+        
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'order_status_changed') {
+              // Recargar pedidos cuando el admin cambie el estado
+              load();
+            }
+          } catch (e) {
+            console.error('Error parsing WebSocket message:', e);
+          }
+        };
+        
+        ws.onerror = (error) => {
+          // Silenciar errores de WebSocket - la app funciona sin ellos
+          console.debug('WebSocket connection issue (non-critical):', error);
+        };
+        
+        ws.onclose = (event) => {
+          console.log('WebSocket connection closed:', event.code, event.reason);
+        };
+        
+        return () => {
+          if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+            ws.close();
+          }
+        };
+      } catch (e) {
+        console.debug('Failed to initialize WebSocket (non-critical):', e);
+      }
     }
   }, [user, isAuthReady]);
 
@@ -161,18 +176,7 @@ export default function Orders() {
           src={robotPedidoCamino}
           alt="Pedido en camino"
           className="robotRopaShopLeft"
-          style={{
-            position: "fixed",
-            left: "2%",
-            top: "55%",
-            transform: "translateY(-50%)",
-            width: "320px",
-            height: "320px",
-            objectFit: "contain",
-            zIndex: "10",
-            transition: "all 0.3s ease",
-            animation: "float 3s ease-in-out infinite"
-          }}
+          
         />
       )}
       <img
@@ -225,12 +229,7 @@ export default function Orders() {
                 <p>Pedido en Camino</p>
               </div>
             </div>
-            <div className="robotContactInfo">
-              <h3>Contacto</h3>
-              <p>📍 Colombia</p>
-              <p>📞 +57 300 123 4567</p>
-              <p>✉ contacto@ropashop.com</p>
-            </div>
+            
           </div>
         </div>
       )}
