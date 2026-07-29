@@ -245,20 +245,17 @@ main.container { flex: 1; padding: 18px 0 40px; }
   font-size: 0.92rem;
   color: rgba(255,255,255,.78);
 }
-.eyebrow {
-  display: inline-block;
-  margin-bottom: 18px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: #f0eff1;
-}
 .heroCopy h1 {
   margin: 0;
-  font-size: clamp(2.5rem, 2.3vw, 4rem);
-  line-height: 1.02;
-  color: #f2f2f3;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(3.8rem, 6vw, 6.5rem);
+  font-weight: 800;
+  line-height: .95;
+  letter-spacing: -2px;
+  color: #111827; /* Negro */
+}
+.heroCopy h1 span {
+  color: #315CFF; /* Azul */
 }
 .heroText {
   margin: 20px 0 0;

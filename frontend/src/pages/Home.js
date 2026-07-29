@@ -324,7 +324,7 @@ export default function Home() {
         <div className="heroOverlay" />
         <div className="container heroContent">
           <div className="heroTopNav">
-            <span className="heroTag">NIGHT SALE 🔥</span>
+            <span className="heroTag">NIGHT SALE🔥</span>
             <button
               className="heroCTA"
               type="button"
@@ -340,8 +340,11 @@ export default function Home() {
             </button>
           </div>
           <div className="heroCopy">
-            <span className="eyebrow">Tienda pastel</span>
-            <h1>Legacy de estilo y color en cada look.</h1>
+            <span className="heroCopy"></span>
+            <h1>
+              Viste tu <br />
+              <span>esencia.</span>
+            </h1>
             <p className="heroText">
               Descubre prendas con actitud suave, banner llamativo y un catálogo moderno para tu tienda.
             </p>
