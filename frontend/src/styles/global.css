@@ -863,6 +863,7 @@ input:focus, select:focus {
   height: auto;
   object-fit: contain;
   z-index: 25;
+  pointer-events: none;
   transition: all 0.3s ease;
   top: 40%;
   transform: translateY(-50%);
@@ -896,6 +897,7 @@ input:focus, select:focus {
   pointer-events: none;
 }
 
+<<<<<<< HEAD
 
 /*pantallas medianas: reducir tama;o*/
 
@@ -903,6 +905,21 @@ input:focus, select:focus {
   .robotRopaShop,
   .robotRopaShopLeft,
   .robotRopaShopRight,
+=======
+/* Ocultar robot en pantallas pequeñas */
+@media (max-width: 900px) {
+  .authRobot {
+    display: none;
+  }
+}
+
+
+.footer{ border-top: 1px solid var(--line); padding: 18px 0; background: rgba(11,15,20,.45); backdrop-filter: blur(10px); }
+.footerInner{ display:flex; justify-content:space-between; align-items:center; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+
+/* Ocultar robot en pantallas pequeñas */
+@media (max-width: 1469px) {
+>>>>>>> origin/developer
   .authRobot {
     display: none;
   }

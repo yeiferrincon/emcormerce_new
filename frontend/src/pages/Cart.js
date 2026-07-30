@@ -38,6 +38,9 @@ export default function Cart() {
     setLoading(true);
     setError("");
     try {
+      if (!token) {
+        await createGuestSession();
+      }
       const res = await api.get("/cart");
       setCart(res.data);
     } catch {
@@ -83,15 +86,10 @@ export default function Cart() {
     setLoading(true);
     setPaymentStep(2);
     try {
-      console.log("Enviando pedido con datos de envío:", {
-        shipping_address: shippingAddress,
-        shipping_phone: shippingPhone
-      });
-      const response = await api.post("/orders", {
-        shipping_address: shippingAddress,
-        shipping_phone: shippingPhone
-      });
-      console.log("Respuesta del servidor:", response.data);
+      if (!token) {
+        await createGuestSession();
+      }
+      const response = await api.post("/orders");
       setPaymentStep(3);
       setRobotState("success");
       setTimeout(() => {
