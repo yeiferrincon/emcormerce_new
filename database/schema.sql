@@ -75,6 +75,8 @@ CREATE TABLE IF NOT EXISTS orders (
   currency         CHAR(3) NOT NULL DEFAULT 'COP',
   shipping_address VARCHAR(500) NULL,
   shipping_phone   VARCHAR(32) NULL,
+  cancellation_comment VARCHAR(1000) NULL,
+  original_order_id INT NULL REFERENCES orders(id) ON DELETE SET NULL,
   created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -82,6 +84,7 @@ CREATE TABLE IF NOT EXISTS orders (
 CREATE TABLE IF NOT EXISTS order_items (
   id                  SERIAL PRIMARY KEY,
   order_id            INT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  product_id          INT NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
   product_variant_id  INT NOT NULL REFERENCES product_variants(id) ON DELETE RESTRICT,
   quantity            INT NOT NULL CHECK (quantity >= 1),
   price               NUMERIC(12,2) NOT NULL CHECK (price > 0)
@@ -172,6 +175,8 @@ CREATE TABLE orders (
     currency CHAR(3),
     shipping_address VARCHAR(500),
     shipping_phone VARCHAR(30),
+    cancellation_comment VARCHAR(1000),
+    original_order_id INT REFERENCES orders(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -737,12 +737,29 @@ input:focus, select:focus {
    ============================================ */
 
 /* Robot en página de login/registro */
+.auth {
+  position: relative;
+  min-height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.authCard {
+  width: 100%;
+  max-width: 420px;
+  z-index: 20;
+  position: relative;
+}
+
 .authRobot {
   position: fixed;
   width: 280px;
   height: 280px;
   object-fit: contain;
-  z-index: 10;
+  z-index: 1;
+  pointer-events: none;
   transition: all 0.3s ease;
   top: 40%;
   transform: translateY(-50%);
@@ -757,6 +774,17 @@ input:focus, select:focus {
 }
 
 /* Ocultar robot en pantallas pequeñas */
+@media (max-width: 900px) {
+  .authRobot {
+    display: none;
+  }
+}
+
+
+.footer{ border-top: 1px solid var(--line); padding: 18px 0; background: rgba(11,15,20,.45); backdrop-filter: blur(10px); }
+.footerInner{ display:flex; justify-content:space-between; align-items:center; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+
+/* Ocultar robot en pantallas pequeñas */
 @media (max-width: 1469px) {
   .authRobot {
     display: none;
@@ -766,6 +794,37 @@ input:focus, select:focus {
   }
   .robotRopaShopRight {
     display: none;
+  }
+}
+
+/* Responsive para login/registro */
+@media (min-width: 1470px) and (max-width: 1920px) {
+  .authRobot {
+    width: 300px;
+    height: 300px;
+    left: 70%;
+  }
+}
+
+@media (min-width: 1921px) {
+  .authRobot {
+    width: 350px;
+    height: 350px;
+    left: 65%;
+  }
+  
+  .authCard {
+    max-width: 480px;
+  }
+}
+
+@media (max-width: 768px) {
+  .auth {
+    padding: 16px;
+  }
+  
+  .authCard {
+    max-width: 100%;
   }
 }
 

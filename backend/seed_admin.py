@@ -28,7 +28,7 @@ def seed():
         admin_user = User(
             name="Administrador RopaShop",
             email=email,
-            password_hash=hash_password("admin12345"),
+            password_hash=hash_password("45"),
             role=UserRole.admin,
             phone="+57 300 123 4567",
             address="Oficinas Principales RopaShop, Medellín",

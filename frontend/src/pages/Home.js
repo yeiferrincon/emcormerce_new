@@ -546,7 +546,7 @@ export default function Home() {
                 setQ("");
                 setCategoryId("");
                 setPage(1);
-                setTimeout(() => loadProducts(1), 0);
+                loadProducts(1);
               }}
             >
               Limpiar

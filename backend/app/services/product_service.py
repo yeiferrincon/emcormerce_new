@@ -192,8 +192,21 @@ def get_or_create_default_variant(db: Session, *, product_id: int) -> int:
 
 
 def delete_product(db: Session, product: Product) -> None:
-    # Eliminar el producto de la base de datos.
-    db.delete(product)
+    # Soft-delete: no eliminar la fila ni la imagen.
+    # Marcar el producto y sus variantes como sin stock y añadir
+    # un mensaje visible al cliente. De esta forma el producto
+    # seguirá existiendo en la BD pero no podrá agregarse al carrito.
+    product.stock = 0
+    for variante in product.variants:
+        variante.stock = 0
+
+    nota = "Agotado"
+    if product.description:
+        if nota not in product.description:
+            product.description = f"{product.description.rstrip()}\n\n{nota}"
+    else:
+        product.description = nota
+
     db.flush()
 
 
@@ -223,7 +236,29 @@ def update_variant_stock(db: Session, variant: ProductVariant, *, stock: int) ->
 
 def delete_variant(db: Session, variant: ProductVariant) -> None:
     # Eliminar una variante y recalcular el stock general del producto.
+    # Primero verificar si tiene pedidos asociados
+    from app.models.order_item import OrderItem
+    from app.models.cart_item import CartItem
+
     product_id = variant.product_id
+
+    # Verificar si la variante tiene pedidos
+    order_items = db.execute(
+        select(OrderItem).where(
+            OrderItem.product_variant_id == variant.id)
+    ).scalar_one_or_none()
+
+    if order_items:
+        raise ValueError(
+            "Esta variante ya tiene unidades vendidas y no se puede eliminar. "
+            "Para ocultarla, establece su stock en 0."
+        )
+
+    # Eliminar cart_items relacionados
+    db.execute(db.delete(CartItem).where(
+        CartItem.product_variant_id == variant.id))
+
+    # Eliminar la variante
     db.delete(variant)
     db.flush()
     _recalculate_product_stock(db, product_id=product_id)
