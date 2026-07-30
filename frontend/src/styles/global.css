@@ -897,33 +897,39 @@ input:focus, select:focus {
   pointer-events: none;
 }
 
-<<<<<<< HEAD
-
-/*pantallas medianas: reducir tama;o*/
-
+/*pantallas medianas: reducir tamaño*/
 @media (max-width: 1200px) {
   .robotRopaShop,
   .robotRopaShopLeft,
   .robotRopaShopRight,
-=======
-/* Ocultar robot en pantallas pequeñas */
-@media (max-width: 900px) {
   .authRobot {
     display: none;
   }
 }
 
+.footer {
+  border-top: 1px solid var(--line);
+  padding: 18px 0;
+  background: rgba(11,15,20,.45);
+  backdrop-filter: blur(10px);
+}
 
-.footer{ border-top: 1px solid var(--line); padding: 18px 0; background: rgba(11,15,20,.45); backdrop-filter: blur(10px); }
-.footerInner{ display:flex; justify-content:space-between; align-items:center; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+.footerInner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
 
-/* Ocultar robot en pantallas pequeñas */
 @media (max-width: 1469px) {
->>>>>>> origin/developer
   .authRobot {
     display: none;
   }
 }
+  .authRobot {
+    display: none;
+  }
+
 
 /*moviles: desaparecer*/
 @media (max-width: 768px) {
