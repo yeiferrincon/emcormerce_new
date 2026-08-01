@@ -117,7 +117,7 @@ export default function Cart() {
   }
 
   useEffect(() => {
-    if (token && isAuthReady) {
+    if (isAuthReady) {
       load();
     }
   }, [token, isAuthReady]);
