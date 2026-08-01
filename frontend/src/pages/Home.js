@@ -324,7 +324,7 @@ export default function Home() {
         <div className="heroOverlay" />
         <div className="container heroContent">
           <div className="heroTopNav">
-            <span className="heroTag">NIGHT SALE 🔥</span>
+            <span className="heroTag">NIGHT SALE🔥</span>
             <button
               className="heroCTA"
               type="button"
@@ -340,6 +340,11 @@ export default function Home() {
             </button>
           </div>
           <div className="heroCopy">
+            <span className="heroCopy"></span>
+            <h1>
+              Viste tu <br />
+              <span>esencia.</span>
+            </h1>
             <span className="eyebrow">Nueva Colección</span>
             <h1>La moda que refleja tu personalidad.</h1>
             <p className="heroText">
