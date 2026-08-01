@@ -345,10 +345,9 @@ export default function Home() {
               Viste tu <br />
               <span>esencia.</span>
             </h1>
-            <span className="eyebrow">Nueva Colección</span>
-            <h1>La moda que refleja tu personalidad.</h1>
+            <h1 className="heroSlogan">Más que ropa, una forma de expresarte</h1>
             <p className="heroText">
-              Explora una colección pensada para quienes buscan estilo,calidad y una experiencia de compra sencilla.
+              Descubre nuestra colección diseñada para acompañar tu estilo en cada momento.
             </p>
             <div className="heroActions">
               <button className="btn" type="button" onClick={() => document.getElementById("searchInput")?.focus()}>
@@ -371,17 +370,28 @@ export default function Home() {
           </div>
           <div className="heroVisual">
             <div className="heroCard">
-              <span className="eyebrow">Destacados</span>
-              <h2>Prendas de temporada</h2>
-              <p>La mejor selección para quienes buscan calidad, color y un estilo urbano suave.</p>
-              <div className="heroStats">
-                <div>
+              <div className="heroCardHeader">
+                <span className="eyebrow">✨ COLECCIÓN DESTACADA</span>
+                <span className="discountBadge">-20%</span>
+              </div>
+              <h2>Descubre<br />tu estilo.</h2>
+              <p>Sudaderas, camisetas y accesorios<br />con los colores que marcarán tendencia<br />este año.</p>
+              <button className="heroCardButton" type="button">Ver colección →</button>
+              <div className="heroStats heroFeatureGrid">
+                <div className="heroFeature">
+                  <span className="heroFeatureIcon">📦</span>
                   <strong>+120</strong>
                   <span>Productos</span>
                 </div>
-                <div>
-                  <strong>Envío rápido</strong>
-                  <span>48 horas</span>
+                <div className="heroFeature">
+                  <span className="heroFeatureIcon">🚚</span>
+                  <strong>24-48h</strong>
+                  <span>Envío rápido</span>
+                </div>
+                <div className="heroFeature">
+                  <span className="heroFeatureIcon">🛡️</span>
+                  <strong>100%</strong>
+                  <span>Pago seguro</span>
                 </div>
               </div>
             </div>
