@@ -12,19 +12,30 @@ export default function CartVariantModal({ product, currentVariantId, currentQua
   async function handleUpdate() {
     setLoading(true);
     try {
-      // Primero remover la variante actual
-      await api.delete("/cart/remove", { data: { product_variant_id: currentVariantId } });
-      
-      // Luego agregar la nueva variante con la nueva cantidad
-      if (quantity > 0) {
-        await api.post("/cart/add", { product_variant_id: selectedVariantId, quantity });
+      // Si es la misma variante, solo actualizar la cantidad
+      if (selectedVariantId === currentVariantId) {
+        const res = await api.put("/cart/update", { product_variant_id: currentVariantId, quantity });
+        console.log("Respuesta de /cart/update:", res.data);
+        if (onUpdate) onUpdate(res.data);
+        onClose();
+      } else {
+        // Si es diferente variante, remover la actual y agregar la nueva
+        await api.delete("/cart/remove", { data: { product_variant_id: currentVariantId } });
+        
+        // Agregar la nueva variante con la nueva cantidad
+        if (quantity > 0) {
+          const res = await api.post("/cart/add", { product_variant_id: selectedVariantId, quantity });
+          console.log("Respuesta de /cart/add:", res.data);
+          if (onUpdate) onUpdate(res.data);
+        } else {
+          const res = await api.get("/cart");
+          console.log("Respuesta de /cart:", res.data);
+          if (onUpdate) onUpdate(res.data);
+        }
+        onClose();
       }
-      
-      // Recargar el carrito completo
-      const cartRes = await api.get("/cart");
-      if (onUpdate) onUpdate(cartRes.data);
-      onClose();
     } catch (err) {
+      console.error("Error al actualizar:", err);
       alert("No se pudo actualizar el carrito");
     } finally {
       setLoading(false);

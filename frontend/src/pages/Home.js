@@ -12,6 +12,7 @@ import robot5 from "../Img/RobotRopaShop_5_Con_Error.png";
 import robot6 from "../Img/RobotRopaShop_6_contraseña oculta.png";
 import robot7 from "../Img/RobotRopaShop_7_mostrar contraseña.png";
 import robot8 from "../Img/RobotRopaShop_8_actualizar contraseña.png";
+import robotPedidoCamino from "../Img/robotRopaShop_pedido_Camino.png";
 
 export default function Home() {
   const { user } = useAuth();
@@ -161,31 +162,14 @@ export default function Home() {
           category_id: Number(adminCategory),
         };
 
-        const res = await api.post("/products", payload);
-
+        // Si se proporcionan datos de variante, incluirlos en la creación del producto
         if (adminVariantSize && adminVariantColor) {
-          try {
-            await api.post(`/products/${res.data.id}/variants`, {
-              size: adminVariantSize,
-              color: adminVariantColor,
-              stock: Number(adminVariantStock) || 1,
-            });
-          } catch {
-            setAdminStatus({ type: "danger", message: "Producto creado, pero no se pudo crear la variante." });
-            setAdminName("");
-            setAdminDescription("");
-            setAdminPrice(0);
-            setAdminCategory("");
-            setAdminVariantSize("");
-            setAdminVariantColor("");
-            setAdminVariantStock(1);
-            setAdminImageFile(null);
-            e.target.reset();
-            setPage(1);
-            loadProducts(1);
-            return;
-          }
+          payload.size = adminVariantSize;
+          payload.color = adminVariantColor;
+          payload.stock = Number(adminVariantStock) || 1;
         }
+
+        const res = await api.post("/products", payload);
 
         if (adminImageFile) {
           const compressedImage = await compressProductImage(adminImageFile);
@@ -316,6 +300,10 @@ export default function Home() {
                 <img src={robot8} alt="Robot 8 - Actualizar Contraseña" />
                 <p>Actualizar Contraseña</p>
               </div>
+              <div className="robotItem">
+                <img src={robotPedidoCamino} alt="Robot 9 - Pedido en Camino" />
+                <p>Pedido en Camino</p>
+              </div>
             </div>
           </div>
         </div>
@@ -324,7 +312,7 @@ export default function Home() {
         <div className="heroOverlay" />
         <div className="container heroContent">
           <div className="heroTopNav">
-            <span className="heroTag">NIGHT SALE 🔥</span>
+            <span className="heroTag">Nueva Colección</span>
             <button
               className="heroCTA"
               type="button"
@@ -336,14 +324,21 @@ export default function Home() {
                 document.getElementById("searchInput")?.focus();
               }}
             >
-              Ver todo
+              Explorar catálogo
             </button>
           </div>
           <div className="heroCopy">
+<<<<<<< Updated upstream
             <span className="eyebrow">Tienda pastel</span>
             <h1>Legacy de estilo y color en cada look.</h1>
             <p className="heroText">
               Descubre prendas con actitud suave, banner llamativo y un catálogo moderno para tu tienda.
+=======
+            <span className="eyebrow">Nueva Colección</span>
+            <h1>La moda comienza aquí.</h1>
+            <p className="heroText">
+              Explora una experiencia de compra moderna con cientos de productos, múltiples categorías y las mejores ofertas para renovar tu guardarropa.
+>>>>>>> Stashed changes
             </p>
             <div className="heroActions">
               <button className="btn" type="button" onClick={() => document.getElementById("searchInput")?.focus()}>
@@ -366,17 +361,17 @@ export default function Home() {
           </div>
           <div className="heroVisual">
             <div className="heroCard">
-              <span className="eyebrow">Destacados</span>
-              <h2>Prendas de temporada</h2>
-              <p>La mejor selección para quienes buscan calidad, color y un estilo urbano suave.</p>
+              <span className="eyebrow">DESTACADOS</span>
+              <h2>Nueva colección 2026</h2>
+              <p>Diseños exclusivos para hombre, mujer y niños. Más de 500 productos disponibles con envíos rápidos y compras 100 % seguras.</p>
               <div className="heroStats">
                 <div>
-                  <strong>+120</strong>
+                  <strong>📦 +500</strong>
                   <span>Productos</span>
                 </div>
                 <div>
-                  <strong>Envío rápido</strong>
-                  <span>48 horas</span>
+                  <strong>🚚 24-48h</strong>
+                  <span>Entrega</span>
                 </div>
               </div>
             </div>
@@ -557,7 +552,7 @@ export default function Home() {
 
       <section className="grid">
         {items.length
-          ? items.map((p) => <ProductCard key={p.id} p={p} onEditVariants={handleEditVariants} onDelete={handleDeleteProduct} />)
+          ? items.map((p) => <ProductCard key={p.id} p={p} onEditVariants={handleEditVariants} />)
           : !loading && <div className="panel muted">No hay productos disponibles para esta búsqueda.</div>}
       </section>
 

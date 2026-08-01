@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
 import CartItem from "./CartItem";
 
 export default function CartDrawer({ open, onClose }) {
   const { token } = useAuth();
+  const navigate = useNavigate();
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -36,6 +37,11 @@ export default function CartDrawer({ open, onClose }) {
     } catch {
       setError("No se pudo eliminar el item.");
     }
+  }
+
+  function handleCartUpdate(updatedCart) {
+    console.log("Actualizando carrito en drawer:", updatedCart);
+    setCart({ ...updatedCart });
   }
 
   useEffect(() => {
@@ -70,7 +76,7 @@ export default function CartDrawer({ open, onClose }) {
         ) : (
           <>
             <div className="drawerBody">
-              {cart?.items?.length ? cart.items.map((it) => <CartItem key={it.id} item={it} onRemove={remove} />) : <div className="panel muted">Tu carrito está vacío.</div>}
+              {cart?.items?.length ? cart.items.map((it) => <CartItem key={`${it.id}-${it.quantity}`} item={it} onRemove={remove} onUpdateQuantity={handleCartUpdate} />) : <div className="panel muted">Tu carrito está vacío.</div>}
             </div>
             <div className="drawerFooter">
               <div className="row">
@@ -81,7 +87,7 @@ export default function CartDrawer({ open, onClose }) {
                 <Link className="btn ghost" to="/cart" onClick={onClose}>
                   Ver carrito
                 </Link>
-                <button className="btn" onClick={onClose} disabled={!cart?.items?.length}>
+                <button className="btn" onClick={() => { onClose(); navigate("/cart"); }} disabled={!cart?.items?.length}>
                   Continuar
                 </button>
               </div>

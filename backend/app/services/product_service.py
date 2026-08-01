@@ -6,7 +6,7 @@ Este archivo contiene las operaciones más importantes del catálogo: listar pro
 crear categorías, agregar variantes y actualizar el stock.
 """
 
-from sqlalchemy import and_, func, or_, select, update
+from sqlalchemy import and_, delete, func, or_, select, update
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.category import Category
@@ -41,9 +41,6 @@ def get_product(db: Session, product_id: int) -> Product | None:
     if producto and not producto.variants:
         # Si el producto no tiene variantes, crear una variante por defecto.
         stock = int(producto.stock or 0)
-        if stock <= 0:
-            stock = 1
-            producto.stock = stock
         variant = ProductVariant(
             product_id=producto.id,
             size="Única",
@@ -134,6 +131,9 @@ def create_product(
     price: float,
     category_id: int,
     image_url: str | None,
+    size: str | None = None,
+    color: str | None = None,
+    stock: int = 0,
 ) -> Product:
     # Crear un producto nuevo con stock inicial en cero.
     product = Product(
@@ -146,6 +146,19 @@ def create_product(
     )
     db.add(product)
     db.flush()
+    
+    # Si se proporcionan datos de variante, crearla directamente
+    if size and color:
+        variant = ProductVariant(
+            product_id=product.id,
+            size=size,
+            color=color,
+            stock=stock if stock > 0 else 1,
+        )
+        db.add(variant)
+        db.flush()
+        _recalculate_product_stock(db, product_id=product.id)
+    
     return product
 
 
@@ -175,9 +188,6 @@ def get_or_create_default_variant(db: Session, *, product_id: int) -> int:
         return producto.variants[0].id
 
     stock = int(producto.stock or 0)
-    if stock <= 0:
-        stock = 1
-        producto.stock = stock
     variante = ProductVariant(
         product_id=producto.id,
         size="Única",
@@ -197,22 +207,23 @@ def delete_product(db: Session, product: Product) -> None:
     from app.models.order_item import OrderItem
     from app.models.cart_item import CartItem
 
-    # Verificar si el producto tiene pedidos
-    order_items = db.execute(
-        select(OrderItem).where(OrderItem.product_id == product.id)
-    ).scalar_one_or_none()
+    # Verificar si el producto tiene pedidos (usando count para evitar falsos positivos)
+    order_items_count = db.execute(
+        select(func.count(OrderItem.id)).where(OrderItem.product_id == product.id)
+    ).scalar_one()
 
-    if order_items:
+    if order_items_count > 0:
         raise ValueError(
             "Este producto ya tiene unidades vendidas y no se puede eliminar. "
             "Para ocultarlo, establece el stock en 0."
         )
 
     # Eliminar cart_items relacionados
-    db.execute(db.delete(CartItem).where(
-        CartItem.product_id == product.id))
+    db.execute(
+        delete(CartItem).where(CartItem.product_id == product.id)
+    )
 
-    # Eliminar variantes (cascade ya está configurado)
+    # Eliminar variantes (cascade ya está configurado en el modelo, pero las eliminamos explícitamente)
     for variant in product.variants:
         db.delete(variant)
 
@@ -237,9 +248,14 @@ def add_variant(
     return variant
 
 
-def update_variant_stock(db: Session, variant: ProductVariant, *, stock: int) -> ProductVariant:
-    # Cambiar el stock disponible de una variante concreta.
-    variant.stock = stock
+def update_variant_stock(db: Session, variant: ProductVariant, *, size: str | None = None, color: str | None = None, stock: int | None = None) -> ProductVariant:
+    # Cambiar el stock disponible y/o talla/color de una variante concreta.
+    if size is not None:
+        variant.size = size
+    if color is not None:
+        variant.color = color
+    if stock is not None:
+        variant.stock = stock
     db.flush()
     _recalculate_product_stock(db, product_id=variant.product_id)
     return variant
@@ -254,20 +270,21 @@ def delete_variant(db: Session, variant: ProductVariant) -> None:
     product_id = variant.product_id
 
     # Verificar si la variante tiene pedidos
-    order_items = db.execute(
-        select(OrderItem).where(
+    order_items_count = db.execute(
+        select(func.count(OrderItem.id)).where(
             OrderItem.product_variant_id == variant.id)
-    ).scalar_one_or_none()
+    ).scalar_one()
 
-    if order_items:
+    if order_items_count > 0:
         raise ValueError(
             "Esta variante ya tiene unidades vendidas y no se puede eliminar. "
             "Para ocultarla, establece su stock en 0."
         )
 
-    # Eliminar cart_items relacionados
-    db.execute(db.delete(CartItem).where(
-        CartItem.product_variant_id == variant.id))
+    # Eliminar cart_items relacionados (items en carrito pueden ser eliminados)
+    db.execute(
+        delete(CartItem).where(CartItem.product_variant_id == variant.id)
+    )
 
     # Eliminar la variante
     db.delete(variant)

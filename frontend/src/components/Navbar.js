@@ -1,6 +1,10 @@
 import React from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+<<<<<<< Updated upstream
+=======
+import logo from "../Img/Logo.png";
+>>>>>>> Stashed changes
 
 export default function Navbar({ ui }) {
   const { token, user, logout } = useAuth();
@@ -9,10 +13,13 @@ export default function Navbar({ ui }) {
     <header className="nav">
       <div className="container navInner">
         <Link to="/" className="brand">
+<<<<<<< Updated upstream
           <span className="brandMark">RS</span>
           <span className="brandName">RopaShop</span>
+=======
+          <img src={logo} alt="RopaShop" className="logo" />
+>>>>>>> Stashed changes
         </Link>
-
         <nav className="navLinks">
           <NavLink to="/" className={({ isActive }) => (isActive ? "active" : "")}>
             Productos

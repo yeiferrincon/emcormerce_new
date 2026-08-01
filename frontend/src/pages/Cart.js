@@ -14,6 +14,7 @@ import robot5 from "../Img/RobotRopaShop_5_Con_Error.png";
 import robot6 from "../Img/RobotRopaShop_6_contraseña oculta.png";
 import robot7 from "../Img/RobotRopaShop_7_mostrar contraseña.png";
 import robot8 from "../Img/RobotRopaShop_8_actualizar contraseña.png";
+import robotPedidoCamino from "../Img/robotRopaShop_pedido_Camino.png";
 
 export default function Cart() {
   const [cart, setCart] = useState(null);
@@ -66,7 +67,8 @@ export default function Cart() {
   }
 
   function handleCartUpdate(updatedCart) {
-    setCart(updatedCart);
+    console.log("Actualizando carrito:", updatedCart);
+    setCart({ ...updatedCart });
   }
 
   async function checkout() {
@@ -176,7 +178,7 @@ export default function Cart() {
           {cart?.items?.length ? (
             <div className="panel">
               {cart.items.map((it) => (
-                <CartItem key={it.id} item={it} onRemove={remove} onUpdateQuantity={handleCartUpdate} />
+                <CartItem key={`${it.id}-${it.quantity}`} item={it} onRemove={remove} onUpdateQuantity={handleCartUpdate} />
               ))}
             </div>
           ) : (
@@ -232,6 +234,10 @@ export default function Cart() {
               <div className="robotItem">
                 <img src={robot8} alt="Robot 8 - Actualizar Contraseña" />
                 <p>Actualizar Contraseña</p>
+              </div>
+              <div className="robotItem">
+                <img src={robotPedidoCamino} alt="Robot 9 - Pedido en Camino" />
+                <p>Pedido en Camino</p>
               </div>
             </div>
           </div>

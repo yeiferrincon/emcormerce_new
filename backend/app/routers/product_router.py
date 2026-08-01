@@ -101,6 +101,9 @@ def crear_producto(datos: ProductCreate, db: Session = Depends(get_db)) -> Produ
             price=datos.price,
             category_id=datos.category_id,
             image_url=datos.image_url,
+            size=datos.size if hasattr(datos, 'size') else None,
+            color=datos.color if hasattr(datos, 'color') else None,
+            stock=datos.stock if hasattr(datos, 'stock') else 0,
         )
         db.commit()
         db.refresh(producto)
@@ -170,12 +173,12 @@ def crear_variante(product_id: int, datos: ProductVariantCreate, db: Session = D
 
 @router.put("/variants/{variant_id}", response_model=ProductVariantOut, dependencies=[Depends(require_admin)])
 def actualizar_variante(variant_id: int, datos: ProductVariantUpdate, db: Session = Depends(get_db)) -> ProductVariantOut:
-    # datos indica el nuevo stock de la variante.
+    # datos indica el nuevo stock, talla y/o color de la variante.
     variante = db.get(ProductVariant, variant_id)
     if not variante:
         raise HTTPException(status_code=404, detail="Variant not found")
     try:
-        product_service.update_variant_stock(db, variante, stock=datos.stock)
+        product_service.update_variant_stock(db, variante, size=datos.size, color=datos.color, stock=datos.stock)
         db.commit()
         db.refresh(variante)
     except Exception as exc:

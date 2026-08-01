@@ -9,6 +9,7 @@ import robotPasswordHidden from "../Img/RobotRopaShop_6_contraseña oculta.png";
 import robotPasswordVisible from "../Img/RobotRopaShop_7_mostrar contraseña.png";
 import robotPasswordUpdate from "../Img/RobotRopaShop_8_actualizar contraseña.png";
 import robotIcon from "../Img/RobotRopaShop_1.png";
+import robotPedidoCamino from "../Img/robotRopaShop_pedido_Camino.png";
 import robot2 from "../Img/RobotRopaShop_2_Con_Exito.png";
 import robot3 from "../Img/RobotRopaShop_3_Pensando.png";
 import robot4 from "../Img/RobotRopaShop_4_Saludando.png";
@@ -106,15 +107,6 @@ export default function Register() {
   }
 
   function getRobotPosition() {
-    if (robotState === "exito") {
-      return "left";
-    }
-    if (robotState === "error") {
-      return "left";
-    }
-    if (robotState === "passwordHidden" || robotState === "passwordVisible" || robotState === "passwordUpdate") {
-      return "right";
-    }
     return "left";
   }
 
@@ -169,6 +161,10 @@ export default function Register() {
               <div className="robotItem">
                 <img src={robotPasswordUpdate} alt="Robot 8 - Actualizar Contraseña" />
                 <p>Actualizar Contraseña</p>
+              </div>
+              <div className="robotItem">
+                <img src={robotPedidoCamino} alt="Robot 9 - Pedido en Camino" />
+                <p>Pedido en Camino</p>
               </div>
             </div>
           </div>

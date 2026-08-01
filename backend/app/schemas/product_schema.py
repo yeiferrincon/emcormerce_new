@@ -57,6 +57,9 @@ class ProductCreate(BaseModel):
     price: float = Field(gt=0)
     category_id: int
     image_url: str | None = None
+    size: str | None = Field(default=None, min_length=1, max_length=32)
+    color: str | None = Field(default=None, min_length=1, max_length=64)
+    stock: int = Field(default=0, ge=0)
 
 
 class ProductUpdate(BaseModel):
@@ -77,6 +80,8 @@ class ProductVariantCreate(BaseModel):
 
 class ProductVariantUpdate(BaseModel):
     # Datos que pueden actualizarse de una variante.
+    size: str | None = Field(default=None, min_length=1, max_length=32)
+    color: str | None = Field(default=None, min_length=1, max_length=64)
     stock: int = Field(ge=0)
 
 

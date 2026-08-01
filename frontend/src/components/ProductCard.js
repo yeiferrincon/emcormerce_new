@@ -30,9 +30,6 @@ export default function ProductCard({ p, onEditVariants, onDelete }) {
             <button className="btn small" onClick={() => onEditVariants && onEditVariants(p)}>
               Variantes
             </button>
-            <button className="btn small danger" onClick={() => onDelete && onDelete(p)}>
-              Eliminar
-            </button>
           </div>
         )}
       </div>

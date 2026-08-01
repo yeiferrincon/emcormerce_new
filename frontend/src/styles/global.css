@@ -7,8 +7,13 @@
   --ok: #22c55e;
   --accent: #c4b5fd;
   --line: rgba(148,163,184,.24);
-  --shadow: 0 24px 60px rgba(15,23,42,.08);
+  --shadow: 0 15px 40px rgba(59,91,255,.12);
   --radius: 24px;
+  --primary-blue: #3B5BFF;
+  --dark-blue: #1E3A8A;
+  --purple: #6D5DF6;
+  --light-purple: #A78BFA;
+  --white: #FFFFFF;
 }
 
 * { box-sizing: border-box; }
@@ -17,10 +22,10 @@ html, body { min-height: 100%; }
 body {
   margin: 0;
   color: var(--text);
-  background: radial-gradient(circle at 14% 18%, rgba(220,231,255,.45), transparent 30%),
-              radial-gradient(circle at 82% 10%, rgba(253,230,255,.4), transparent 20%),
-              radial-gradient(circle at 60% 90%, rgba(248,255,235,.6), transparent 35%),
-              var(--bg);
+  background: 
+    radial-gradient(circle at 0% 0%, rgba(96,165,250,.15), transparent 28%),
+    radial-gradient(circle at 100% 100%, rgba(139,92,246,.12), transparent 25%),
+    linear-gradient(180deg,#F8FAFF 0%,#EEF3FA 100%);
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 }
 
@@ -42,17 +47,55 @@ main.container { flex: 1; padding: 18px 0 40px; }
   top: 0;
   z-index: 30;
   border-bottom: 1px solid var(--line);
+<<<<<<< Updated upstream
   background: rgba(255,255,255,.92);
   backdrop-filter: blur(12px);
+=======
+  background: rgba(255,255,255,.80);
+  backdrop-filter: blur(20px);
+  box-shadow:
+        0 1px 3px rgba(14, 15, 14, 0.1),
+        0 8px 20px rgba(14, 14, 14, 0.05);
+>>>>>>> Stashed changes
 }
 .navInner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 16px 0;
   gap: 14px;
+  position: relative;
 }
+<<<<<<< Updated upstream
 .brand { display: flex; align-items: center; gap: 10px; }
+=======
+.navLinks { 
+  display: flex; 
+  align-items: center; 
+  gap: 16px; 
+  flex-wrap: wrap;
+}
+.brand {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex; 
+  align-items: center; 
+  gap: 10px;
+  background: transparent;
+  border-radius: 12px;
+  z-index: 10;
+}
+.navRight {
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+>>>>>>> Stashed changes
 .brandMark {
   width: 40px;
   height: 40px;
@@ -67,34 +110,83 @@ main.container { flex: 1; padding: 18px 0 40px; }
 }
 .brandName { font-weight: 800; font-size: 18px; }
 
+<<<<<<< Updated upstream
 .navLinks { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+=======
+.logo{
+  width:280px;
+  height: 70px;
+  object-fit: contain;
+  position: relative;
+  z-index: 50;
+}
+
+.brandName { font-weight: 800; 
+  font-size: 18px;
+  padding-right: 10px;
+}
+/*LINKS NAVBAR*/
+>>>>>>> Stashed changes
 .navLinks a, .linkButton {
   font-size: 14px;
   color: var(--muted);
   padding: 10px 12px;
   border-radius: 14px;
 }
+<<<<<<< Updated upstream
 .navLinks a.active { color: var(--text); background: rgba(196,181,253,.18); }
 .linkButton { background: transparent; border: 0; cursor: pointer; }
 .navRight { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+=======
+.navLinks a,
+.linkButton {
+  font-size: 14px;
+  color: #1f2937;;
+  padding: 10px 12px;
+  border-radius: 14px;
+  text-decoration: none;
+  background: rgba(255,255,255,0.6);
+  border: none;
+  cursor: pointer;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.navLinks a:hover,
+.linkButton:hover {
+  transform: scale(1.08);
+  background: rgba(255,255,255,0.2);
+  color: var(--text);
+}
+
+.navLinks a.active {
+  background: rgba(40, 32, 72, 0.25);
+  color: #111827;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+>>>>>>> Stashed changes
 
 .btn {
   font-weight: 700;
   border: none;
-  background: linear-gradient(180deg, #fb7185, #fbcfe8);
-  color: #1f2937;
+  background: #3B5BFF;
+  color: white;
   padding: 12px 18px;
   border-radius: 16px;
   cursor: pointer;
-  transition: transform .18s ease, box-shadow .18s ease;
-  box-shadow: 0 18px 34px rgba(251,113,133,.16);
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+  box-shadow: 0 15px 40px rgba(59,91,255,.12);
 }
-.btn:hover { transform: translateY(-1px); }
+.btn:hover { 
+  transform: translateY(-1px);
+  background: #2952FF;
+}
 .btn.ghost {
-  background: rgba(255,255,255,.9);
-  border: 1px solid rgba(148,163,184,.38);
-  color: var(--text);
-  box-shadow: 0 10px 24px rgba(148,163,184,.1);
+  background: rgba(255,255,255,.95);
+  border: none;
+  color: #3B5BFF;
+  box-shadow: 0 15px 40px rgba(59,91,255,.12);
 }
 .btn:disabled { opacity: .65; cursor: not-allowed; }
 
@@ -118,12 +210,39 @@ main.container { flex: 1; padding: 18px 0 40px; }
   border: 1px solid rgba(148,163,184,.22);
   border-radius: var(--radius);
   padding: 20px;
+<<<<<<< Updated upstream
   box-shadow: var(--shadow);
+=======
+  box-shadow: 0 15px 40px rgba(59,91,255,.12);  
+  gap: 15px;
+  width: 100%;
+}
+
+.cartpanel{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.cartThumb {
+  width: 250px;
+  height: 250px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.cartThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+>>>>>>> Stashed changes
 }
 
 .homeHero {
-  min-height: 560px;
-  background-image: url("https://lolitamoda.com/uploads/vweb_photo_posts/13-prendas-imprescindibles-de-h/13-prendas-imprescindibles-de-h-6d1c0d81060dca0b57faf7b458af9727.jpg");
+  min-height: 480px;
+  background-image: url("../Img/ModaYEstilo.png");
   background-size: cover;
   background-position: center;
   position: relative;
@@ -134,7 +253,12 @@ main.container { flex: 1; padding: 18px 0 40px; }
   content: "";
   position: absolute;
   inset: 0;
+<<<<<<< Updated upstream
   background: linear-gradient(180deg, rgba(15,23,42,.95), rgba(15,23,42,.55));
+=======
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(15,23,42,.45), rgba(15,23,42,.45));
+>>>>>>> Stashed changes
 }
 .heroOverlay {
   position: absolute;
@@ -164,33 +288,47 @@ main.container { flex: 1; padding: 18px 0 40px; }
   font-weight: 700;
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: #fee2e2;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.20);
+  color: #FFFFFF;
+  background: rgba(59,91,255,.4);
+  border: 1px solid rgba(59,91,255,.6);
   border-radius: 999px;
   padding: 10px 18px;
 }
 .heroCTA {
   border: 1px solid rgba(255,255,255,.35);
-  background: rgba(255,255,255,.18);
-  color: #fff;
+  background: #3B5BFF;
+  color: white;
   padding: 12px 18px;
   border-radius: 16px;
   font-weight: 700;
   cursor: pointer;
 }
+<<<<<<< Updated upstream
 .heroCopy { max-width: 540px; }
+=======
+.heroCopy { max-width: 540px;
+  background: rgba(255,255,255,.12);
+  box-shadow: 0 15px 40px rgba(59,91,255,.12);
+  padding: 10px;
+  border-radius: 30px;
+}
+>>>>>>> Stashed changes
 .heroCopy h1 {
-  color: #fff;
+  color: #FFFFFF;
   margin-top: 8px;
-  font-size: clamp(3rem, 3.3vw, 4.8rem);
-  line-height: 1.02;
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(90deg, #FFFFFF 0%, #C4B5FD 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 .heroText {
   margin: 24px 0 0;
   max-width: 600px;
   line-height: 1.7;
-  color: rgba(255,255,255,.90);
+  color: #FFFFFF;
 }
 .heroActions {
   margin-top: 28px;
@@ -206,45 +344,64 @@ main.container { flex: 1; padding: 18px 0 40px; }
   width: min(100%, 420px);
   min-height: 320px;
   border-radius: 32px;
+<<<<<<< Updated upstream
   border: 1px solid rgba(255,255,255,.18);
   padding: 32px;
   background: rgba(255,255,255,.12);
   box-shadow: 0 30px 90px rgba(15,23,42,.18);
+=======
+  padding: 24px;
+  box-sizing: border-box;
+  background: rgba(25,30,45,.45);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 15px 40px rgba(59,91,255,.12);
+>>>>>>> Stashed changes
 }
 .heroCard h2,
-.heroCard p,
-.heroStats strong,
-.heroStats span {
-  color: #f8fafc;
+.heroCard p {
+  color: #FFFFFF;
+}
+.heroCard h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 .heroStats div {
-  background: rgba(255,255,255,.14);
+  background: #EEF3FA;
   padding: 18px;
-  border-radius: 22px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.15);
 }
 .heroStats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   margin-top: 26px;
+  text-align: center;
 }
 .heroStats strong {
   display: block;
   font-size: 1rem;
+  color: #FFFFFF;
+  font-weight: 700;
 }
 .heroStats span {
   margin-top: 8px;
   font-size: 0.92rem;
-  color: rgba(255,255,255,.78);
+  color: #64748b;
 }
 .eyebrow {
   display: inline-block;
   margin-bottom: 18px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: .2em;
   text-transform: uppercase;
+<<<<<<< Updated upstream
   color: #f0eff1;
+=======
+  color: #FFFFFF;
+>>>>>>> Stashed changes
 }
 .heroCopy h1 {
   margin: 0;
@@ -302,7 +459,8 @@ main.container { flex: 1; padding: 18px 0 40px; }
 .heroStats strong {
   display: block;
   font-size: 1rem;
-  color: #1f2937;
+  color: #3B5BFF;
+  font-weight: 700;
 }
 .heroStats span {
   display: block;
@@ -399,10 +557,11 @@ input:focus, select:focus {
   background: #ffffff;
   overflow: hidden;
   transition: transform .2s ease, box-shadow .2s ease;
+  box-shadow: 0 15px 40px rgba(59,91,255,.12);
 }
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 24px 46px rgba(148,163,184,.14);
+  box-shadow: 0 20px 50px rgba(59,91,255,.18);
 }
 .cardMedia {
   height: 260px;
@@ -472,7 +631,7 @@ input:focus, select:focus {
   background: white;
   border-radius: 16px;
   padding: 24px;
-  max-width: 600px;
+  max-width: 700px;
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
@@ -559,12 +718,33 @@ input:focus, select:focus {
 
 .variantEdit {
   display: flex;
+  flex-direction: row;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.editField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.editField label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.editActions {
+  display: flex;
   gap: 8px;
   align-items: center;
 }
 
 .smallInput {
-  width: 80px;
+  width: 70px;
   padding: 6px 8px;
   font-size: 14px;
   border: 1px solid #cbd5e1;
@@ -666,7 +846,7 @@ input:focus, select:focus {
 /* ============================================
    FOOTER (versión que funcionaba bien)
    ============================================ */
-.footer{ border-top: 1px solid var(--line); padding: 6px 35px 6px 35px; background: rgba(11,15,20,.45); backdrop-filter: blur(10px); }
+.footer{ border-top: 1px solid var(--line); padding: 6px 35px 6px 35px; background: rgba(219, 234, 254, 0.75); backdrop-filter: blur(10px); }
 .footerInner{ display:flex; justify-content:space-between; align-items:flex-start; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; gap: 30px; margin-bottom: 6px; }
 .footerBottom{ display:flex; justify-content:space-between; align-items:center; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; gap: 30px; }
 
@@ -704,8 +884,9 @@ input:focus, select:focus {
   .detail{ grid-template-columns: 1fr; }
   
   .footerInner { 
-    flex-direction: column; 
-    align-items: center; 
+    flex-direction: row; 
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 20px;
   }
   .footerColumn:first-child,
@@ -724,6 +905,56 @@ input:focus, select:focus {
   }
   .footerTechColumns {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px){
+  .footer {
+    padding: 6px 10px 6px 10px;
+  }
+  .footerInner {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+  .footerBottom {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .footerTechColumns {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .footerBrand {
+    font-size: 16px;
+  }
+  .footerTitle {
+    font-size: 13px;
+  }
+  .footerText {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px){
+  .footer {
+    padding: 4px 8px 4px 8px;
+  }
+  .footerInner {
+    gap: 10px;
+  }
+  .footerBrand {
+    font-size: 14px;
+  }
+  .footerTitle {
+    font-size: 12px;
+  }
+  .footerSubtitle {
+    font-size: 11px;
+  }
+  .footerText {
+    font-size: 10px;
   }
 }
 
@@ -756,6 +987,7 @@ input:focus, select:focus {
   z-index: 10;
   transition: all 0.3s ease;
   top: 40%;
+  right: 5%;
   transform: translateY(-50%);
 }
 
@@ -785,7 +1017,7 @@ input:focus, select:focus {
   .authRobot {
     width: 300px;
     height: 300px;
-    left: 70%;
+    right: 5%;
   }
 }
 
@@ -793,7 +1025,7 @@ input:focus, select:focus {
   .authRobot {
     width: 350px;
     height: 350px;
-    left: 65%;
+    right: 5%;
   }
   
   .authCard {
