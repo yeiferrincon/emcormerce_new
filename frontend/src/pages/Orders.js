@@ -176,18 +176,7 @@ export default function Orders() {
           src={robotPedidoCamino}
           alt="Pedido en camino"
           className="robotRopaShopLeft"
-          style={{
-            position: "fixed",
-            left: "2%",
-            top: "55%",
-            transform: "translateY(-50%)",
-            width: "320px",
-            height: "320px",
-            objectFit: "contain",
-            zIndex: "10",
-            transition: "all 0.3s ease",
-            animation: "float 3s ease-in-out infinite"
-          }}
+          
         />
       )}
       <img
@@ -240,12 +229,7 @@ export default function Orders() {
                 <p>Pedido en Camino</p>
               </div>
             </div>
-            <div className="robotContactInfo">
-              <h3>Contacto</h3>
-              <p>📍 Colombia</p>
-              <p>📞 +57 300 123 4567</p>
-              <p>✉ contacto@ropashop.com</p>
-            </div>
+            
           </div>
         </div>
       )}

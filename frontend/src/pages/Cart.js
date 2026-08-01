@@ -117,7 +117,7 @@ export default function Cart() {
   }
 
   useEffect(() => {
-    if (token && isAuthReady) {
+    if (isAuthReady) {
       load();
     }
   }, [token, isAuthReady]);
@@ -172,7 +172,7 @@ export default function Cart() {
           {error && <div className="panel danger">{error}</div>}
 
           {cart?.items?.length ? (
-            <div className="panel">
+            <div className="cartpanel">
               {cart.items.map((it) => (
                 <CartItem key={it.id} item={it} onRemove={remove} onUpdateQuantity={handleCartUpdate} />
               ))}

@@ -13,9 +13,9 @@ export function AuthProvider({ children }) {
     }
   });
   const [isLoggedOut, setIsLoggedOut] = useState(false);
-  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [isAuthReady, setIsAuthReady] = useState(Boolean(localStorage.getItem("token")));
 
-  console.log("AuthProvider - Estado inicial:", { token: token ? "existe" : "no existe", user });
+  console.log("AuthProvider - Estado inicial:", { token: token ? "existe" : "no existe", user, isAuthReady });
   console.log("AuthProvider - Token en localStorage:", localStorage.getItem("token"));
 
   useEffect(() => {
@@ -36,12 +36,7 @@ export function AuthProvider({ children }) {
     }
   }, [user]);
 
-  useEffect(() => {
-    // Si no hay token, crear sesión de invitado automáticamente.
-    if (!token) {
-      createGuestSession();
-    }
-  }, [token]);
+
 
   async function createGuestSession() {
     try {
@@ -52,11 +47,13 @@ export function AuthProvider({ children }) {
       setAuthToken(guestToken);
       setToken(guestToken);
       setUser(res.data.user);
+      setIsLoggedOut(false);
+      setIsAuthReady(true);
       console.log("Sesión de invitado creada exitosamente");
       return guestToken;
     } catch (e) {
       console.error("Error al crear sesión de invitado:", e);
-      // Si falla, el cliente puede intentar de nuevo más tarde.
+      setIsAuthReady(true);
       return "";
     }
   }
@@ -72,6 +69,7 @@ export function AuthProvider({ children }) {
     setToken(res.data.token.access_token);
     setUser(res.data.user);
     setIsLoggedOut(false);
+    setIsAuthReady(true);
   }
 
   async function register(name, email, password) {
@@ -79,12 +77,17 @@ export function AuthProvider({ children }) {
     setToken(res.data.token.access_token);
     setUser(res.data.user);
     setIsLoggedOut(false);
+    setIsAuthReady(true);
   }
 
   function logout() {
-    setToken("");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setAuthToken("");
     setUser(null);
+    setToken("");
     setIsLoggedOut(true);
+    setIsAuthReady(true);
   }
 
   function updateUser(updatedUser) {

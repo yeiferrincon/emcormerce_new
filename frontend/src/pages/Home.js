@@ -345,8 +345,10 @@ export default function Home() {
               Viste tu <br />
               <span>esencia.</span>
             </h1>
+            <span className="eyebrow">Nueva Colección</span>
+            <h1>La moda que refleja tu personalidad.</h1>
             <p className="heroText">
-              Descubre prendas con actitud suave, banner llamativo y un catálogo moderno para tu tienda.
+              Explora una colección pensada para quienes buscan estilo,calidad y una experiencia de compra sencilla.
             </p>
             <div className="heroActions">
               <button className="btn" type="button" onClick={() => document.getElementById("searchInput")?.focus()}>
