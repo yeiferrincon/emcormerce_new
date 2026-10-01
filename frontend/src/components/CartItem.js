@@ -16,23 +16,29 @@ export default function CartItem({ item, onRemove, onUpdateQuantity }) {
             <span className="muted">
               {item.size} / {item.color}
             </span>
-            <div className="quantityControl">
-              <button
-                onClick={() => setShowVariantModal(true)}
-                className="btn"
-                style={{ padding: "4px 12px", fontSize: "12px" }}
-              >
-                Editar ({item.quantity})
-              </button>
-            </div>
           </div>
           <div className="cartPrice">
             {new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP" }).format(item.unit_price * item.quantity)}
           </div>
         </div>
-        <button className="iconBtn" onClick={() => onRemove(item.product_variant_id)} aria-label="Eliminar">
-          ✕
-        </button>
+        <div className="cartActions">
+          <div className="cartQuantity">
+            <strong>Cantidad: {item.quantity}</strong>
+          </div>
+          <button
+            onClick={() => setShowVariantModal(true)}
+            className="btn"
+          >
+            Editar
+          </button>
+          <button 
+            className="btn btn-danger" 
+            onClick={() => onRemove(item.product_variant_id)} 
+            aria-label="Eliminar"
+          >
+            Eliminar
+          </button>
+        </div>
       </div>
       
       {showVariantModal && (

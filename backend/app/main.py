@@ -154,7 +154,29 @@ def revisar_salud() -> dict[str, str]:
 
 @app.websocket("/ws/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, user_id: int):
-    await manager.connect(user_id, websocket)
+    # Verificar si el usuario es admin leyendo el token del query param
+    from app.dependencies.auth import get_current_user
+    from app.config.database import SessionLocal
+    from app.models.user import UserRole
+    
+    is_admin = False
+    try:
+        token = websocket.query_params.get("token")
+        if token:
+            db = SessionLocal()
+            try:
+                from app.middleware.auth_middleware import verify_token
+                user_data = verify_token(token)
+                if user_data:
+                    user = db.query(User).filter(User.id == user_id).first()
+                    if user and user.role == UserRole.admin:
+                        is_admin = True
+            finally:
+                db.close()
+    except Exception:
+        pass
+    
+    await manager.connect(user_id, websocket, is_admin=is_admin)
     try:
         while True:
             data = await websocket.receive_text()

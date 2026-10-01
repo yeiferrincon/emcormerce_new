@@ -15,6 +15,8 @@ class UserCreate(BaseModel):
     name: str = Field(min_length=2, max_length=120)
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
+    address: str | None = Field(default=None, max_length=500)
+    phone: str | None = Field(default=None, max_length=32)
 
 
 class UserOut(BaseModel):

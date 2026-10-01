@@ -5,18 +5,25 @@ export default function ProductVariantsModal({ product, onClose, onUpdate }) {
   const [variants, setVariants] = useState(product.variants || []);
   const [editingVariant, setEditingVariant] = useState(null);
   const [newStock, setNewStock] = useState(0);
+  const [newSize, setNewSize] = useState("");
+  const [newColor, setNewColor] = useState("");
 
-  async function handleUpdateStock(variantId, stock) {
+  async function handleUpdateStock(variantId, stock, size, color) {
     try {
-      await api.put(`/variants/${variantId}`, { stock });
+      const payload = { stock };
+      if (size) payload.size = size;
+      if (color) payload.color = color;
+      
+      await api.put(`/variants/${variantId}`, payload);
       const updatedVariants = variants.map((v) =>
-        v.id === variantId ? { ...v, stock } : v
+        v.id === variantId ? { ...v, stock, size: size || v.size, color: color || v.color } : v
       );
       setVariants(updatedVariants);
       setEditingVariant(null);
       if (onUpdate) onUpdate();
     } catch (err) {
-      alert("No se pudo actualizar el stock de la variante");
+      const errorMessage = err.response?.data?.detail || "No se pudo actualizar la variante";
+      alert(errorMessage);
     }
   }
 
@@ -28,20 +35,26 @@ export default function ProductVariantsModal({ product, onClose, onUpdate }) {
       await api.delete(`/variants/${variantId}`);
       const updatedVariants = variants.filter((v) => v.id !== variantId);
       setVariants(updatedVariants);
+      setEditingVariant(null);
       if (onUpdate) onUpdate();
     } catch (err) {
-      alert("No se pudo eliminar la variante");
+      const errorMessage = err.response?.data?.detail || "No se pudo eliminar la variante";
+      alert(errorMessage);
     }
   }
 
   function startEditing(variant) {
     setEditingVariant(variant.id);
     setNewStock(variant.stock);
+    setNewSize(variant.size);
+    setNewColor(variant.color);
   }
 
   function cancelEditing() {
     setEditingVariant(null);
     setNewStock(0);
+    setNewSize("");
+    setNewColor("");
   }
 
   return (
@@ -65,25 +78,48 @@ export default function ProductVariantsModal({ product, onClose, onUpdate }) {
                   <div className="variantActions">
                     {editingVariant === variant.id ? (
                       <div className="variantEdit">
-                        <input
-                          type="number"
-                          min="0"
-                          value={newStock}
-                          onChange={(e) => setNewStock(Number(e.target.value))}
-                          className="smallInput"
-                        />
-                        <button
-                          className="btn small"
-                          onClick={() => handleUpdateStock(variant.id, newStock)}
-                        >
-                          Guardar
-                        </button>
-                        <button
-                          className="btn small ghost"
-                          onClick={cancelEditing}
-                        >
-                          Cancelar
-                        </button>
+                        <div className="editField">
+                          <label>Talla</label>
+                          <input
+                            type="text"
+                            value={newSize}
+                            onChange={(e) => setNewSize(e.target.value)}
+                            className="smallInput"
+                          />
+                        </div>
+                        <div className="editField">
+                          <label>Color</label>
+                          <input
+                            type="text"
+                            value={newColor}
+                            onChange={(e) => setNewColor(e.target.value)}
+                            className="smallInput"
+                          />
+                        </div>
+                        <div className="editField">
+                          <label>Stock</label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={newStock}
+                            onChange={(e) => setNewStock(Number(e.target.value))}
+                            className="smallInput"
+                          />
+                        </div>
+                        <div className="editActions">
+                          <button
+                            className="btn small"
+                            onClick={() => handleUpdateStock(variant.id, newStock, newSize, newColor)}
+                          >
+                            Guardar
+                          </button>
+                          <button
+                            className="btn small ghost"
+                            onClick={cancelEditing}
+                          >
+                            Cancelar
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <div className="variantStock">
@@ -93,12 +129,6 @@ export default function ProductVariantsModal({ product, onClose, onUpdate }) {
                           onClick={() => startEditing(variant)}
                         >
                           Editar
-                        </button>
-                        <button
-                          className="btn small danger"
-                          onClick={() => handleDeleteVariant(variant.id)}
-                        >
-                          Eliminar
                         </button>
                       </div>
                     )}

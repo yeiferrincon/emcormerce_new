@@ -14,6 +14,7 @@ import robot5 from "../Img/RobotRopaShop_5_Con_Error.png";
 import robot6 from "../Img/RobotRopaShop_6_contraseña oculta.png";
 import robot7 from "../Img/RobotRopaShop_7_mostrar contraseña.png";
 import robot8 from "../Img/RobotRopaShop_8_actualizar contraseña.png";
+import robotPedidoCamino from "../Img/robotRopaShop_pedido_Camino.png";
 
 export default function Cart() {
   const [cart, setCart] = useState(null);
@@ -66,7 +67,8 @@ export default function Cart() {
   }
 
   function handleCartUpdate(updatedCart) {
-    setCart(updatedCart);
+    console.log("Actualizando carrito:", updatedCart);
+    setCart({ ...updatedCart });
   }
 
   async function checkout() {
@@ -75,6 +77,7 @@ export default function Cart() {
     // Pre-llenar datos si el usuario ya los tiene
     setShippingAddress(user?.address || "");
     setShippingPhone(user?.phone || "");
+    console.log("Datos de usuario cargados:", { address: user?.address, phone: user?.phone });
   }
 
   async function processPayment() {
@@ -128,8 +131,8 @@ export default function Cart() {
 
   return (
     <div className="stack">
-      {!robotState && <img src={robotImage} alt="Robot RopaShop" className="robotRopaShop" />}
-      {!robotState && (
+      {!robotState && !showPaymentModal && <img src={robotImage} alt="Robot RopaShop" className="robotRopaShop" />}
+      {!robotState && !showPaymentModal && (
         <img
           src={robotIcon}
           alt="Robot Icon"
@@ -173,24 +176,26 @@ export default function Cart() {
           <h2>Carrito</h2>
           {error && <div className="panel danger">{error}</div>}
 
-          {cart?.items?.length ? (
-            <div className="cartpanel">
-              {cart.items.map((it) => (
-                <CartItem key={it.id} item={it} onRemove={remove} onUpdateQuantity={handleCartUpdate} />
-              ))}
-            </div>
-          ) : (
-            <div className="panel muted">Tu carrito está vacío.</div>
-          )}
+          <div className="cartContentWrapper">
+            {cart?.items?.length ? (
+              <div className="cartpanel">
+                {cart.items.map((it) => (
+                  <CartItem key={`${it.id}-${it.quantity}`} item={it} onRemove={remove} onUpdateQuantity={handleCartUpdate} />
+                ))}
+              </div>
+            ) : (
+              <div className="panel muted">Tu carrito está vacío.</div>
+            )}
 
-          <div className="panel">
-            <div className="row">
-              <span className="muted">Subtotal</span>
-              <strong>{subtotalLabel}</strong>
+            <div className="panel">
+              <div className="row">
+                <span className="muted">Subtotal</span>
+                <strong>{subtotalLabel}</strong>
+              </div>
+              <button className="btn" onClick={checkout} disabled={!cart?.items?.length}>
+                Crear pedido (pago simulado)
+              </button>
             </div>
-            <button className="btn" onClick={checkout} disabled={!cart?.items?.length}>
-              Crear pedido (pago simulado)
-            </button>
           </div>
         </>
       )}
@@ -232,6 +237,10 @@ export default function Cart() {
               <div className="robotItem">
                 <img src={robot8} alt="Robot 8 - Actualizar Contraseña" />
                 <p>Actualizar Contraseña</p>
+              </div>
+              <div className="robotItem">
+                <img src={robotPedidoCamino} alt="Robot 9 - Pedido en Camino" />
+                <p>Pedido en Camino</p>
               </div>
             </div>
           </div>

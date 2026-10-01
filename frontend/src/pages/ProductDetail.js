@@ -27,6 +27,17 @@ export default function ProductDetail({ ui }) {
     (selectedVariant && selectedVariant.stock > 0) || (!selectedVariant && p?.stock > 0)
   );
 
+  // Actualizar cantidad cuando cambia la variante seleccionada
+  useEffect(() => {
+    if (selectedVariant) {
+      setQty(selectedVariant.stock > 0 ? 1 : 0);
+    } else if (p?.stock > 0) {
+      setQty(1);
+    } else {
+      setQty(0);
+    }
+  }, [selectedVariant, p]);
+
   async function load() {
     setLoading(true);
     setError("");

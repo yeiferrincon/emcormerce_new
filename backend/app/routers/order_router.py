@@ -22,7 +22,7 @@ router = APIRouter(prefix="/orders", tags=["orders"])
 
 
 @router.post("", response_model=OrderCreateOut, status_code=201)
-def crear_pedido(
+async def crear_pedido(
     db: Session = Depends(get_db),
     usuario=Depends(get_current_user),
     shipping_address: str | None = Body(None),
@@ -42,6 +42,17 @@ def crear_pedido(
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error interno: {str(exc)}")
+    
+    # Notificar a los admins sobre el nuevo pedido
+    await manager.broadcast_to_admins({
+        "type": "new_order",
+        "order_id": pedido.id,
+        "user_id": pedido.user_id,
+        "user_name": pedido.user.name if pedido.user else None,
+        "status": pedido.status,
+        "total_price": float(pedido.total_price),
+        "created_at": pedido.created_at.isoformat() if pedido.created_at else None
+    })
     
     # Construir respuesta manualmente
     order_dict = {

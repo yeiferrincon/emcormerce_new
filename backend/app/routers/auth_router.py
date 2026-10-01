@@ -21,9 +21,9 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=AuthResponse, status_code=201)
 def registrar_usuario(datos: UserCreate, db: Session = Depends(get_db)) -> AuthResponse:
-    # datos contiene el nombre, correo y contraseña del nuevo usuario.
+    # datos contiene el nombre, correo, contraseña, dirección y teléfono del nuevo usuario.
     try:
-        usuario = register_user(db, name=datos.name, email=str(datos.email).lower(), password=datos.password)
+        usuario = register_user(db, name=datos.name, email=str(datos.email).lower(), password=datos.password, address=datos.address, phone=datos.phone)
         db.commit()
     except ValueError as exc:
         # Si el correo ya existe, mostrar un error claro.

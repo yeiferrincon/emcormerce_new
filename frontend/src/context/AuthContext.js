@@ -61,8 +61,8 @@ export function AuthProvider({ children }) {
     setIsLoggedOut(false);
   }
 
-  async function register(name, email, password) {
-    const res = await api.post("/auth/register", { name, email, password });
+  async function register(name, email, password, address, phone) {
+    const res = await api.post("/auth/register", { name, email, password, address, phone });
     setToken(res.data.token.access_token);
     setUser(res.data.user);
     setIsLoggedOut(false);

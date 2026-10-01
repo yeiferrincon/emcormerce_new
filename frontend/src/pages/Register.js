@@ -9,6 +9,7 @@ import robotPasswordHidden from "../Img/RobotRopaShop_6_contraseña oculta.png";
 import robotPasswordVisible from "../Img/RobotRopaShop_7_mostrar contraseña.png";
 import robotPasswordUpdate from "../Img/RobotRopaShop_8_actualizar contraseña.png";
 import robotIcon from "../Img/RobotRopaShop_1.png";
+import robotPedidoCamino from "../Img/robotRopaShop_pedido_Camino.png";
 import robot2 from "../Img/RobotRopaShop_2_Con_Exito.png";
 import robot3 from "../Img/RobotRopaShop_3_Pensando.png";
 import robot4 from "../Img/RobotRopaShop_4_Saludando.png";
@@ -19,6 +20,8 @@ export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [robotState, setRobotState] = useState("saludando");
@@ -33,7 +36,7 @@ export default function Register() {
     setError("");
     setRobotState("exito");
     try {
-      await register(name, email, password);
+      await register(name, email, password, address, phone);
       setTimeout(() => {
         navigate("/");
       }, 1000);
@@ -106,15 +109,6 @@ export default function Register() {
   }
 
   function getRobotPosition() {
-    if (robotState === "exito") {
-      return "left";
-    }
-    if (robotState === "error") {
-      return "left";
-    }
-    if (robotState === "passwordHidden" || robotState === "passwordVisible" || robotState === "passwordUpdate") {
-      return "right";
-    }
     return "left";
   }
 
@@ -169,6 +163,10 @@ export default function Register() {
               <div className="robotItem">
                 <img src={robotPasswordUpdate} alt="Robot 8 - Actualizar Contraseña" />
                 <p>Actualizar Contraseña</p>
+              </div>
+              <div className="robotItem">
+                <img src={robotPedidoCamino} alt="Robot 9 - Pedido en Camino" />
+                <p>Pedido en Camino</p>
               </div>
             </div>
           </div>
@@ -226,6 +224,22 @@ export default function Register() {
                 {showPassword ? "👁️" : "👁️‍🗨️"}
               </button>
             </div>
+          </div>
+          <div className="field">
+            <label>Dirección</label>
+            <input
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              required
+            />
+          </div>
+          <div className="field">
+            <label>Teléfono</label>
+            <input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              required
+            />
           </div>
           <button className="btn" disabled={loading}>
             {loading ? "Creando..." : "Crear"}

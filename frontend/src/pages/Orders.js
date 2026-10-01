@@ -15,7 +15,7 @@ import robotThinking from "../Img/RobotRopaShop_3_Pensando.png";
 import robotPedidoCamino from "../Img/robotRopaShop_pedido_Camino.png";
 
 export default function Orders() {
-  const { user, isAuthReady } = useAuth();
+  const { user, isAuthReady, token } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -121,7 +121,7 @@ export default function Orders() {
       try {
         const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsHost = window.location.hostname === 'localhost' ? 'localhost:8000' : window.location.host;
-        const wsUrl = `${wsProtocol}//${wsHost}/ws/${user.id}`;
+        const wsUrl = `${wsProtocol}//${wsHost}/ws/${user.id}?token=${token}`;
         
         const ws = new WebSocket(wsUrl);
         
@@ -135,6 +135,11 @@ export default function Orders() {
             if (data.type === 'order_status_changed') {
               // Recargar pedidos cuando el admin cambie el estado
               load();
+            } else if (data.type === 'new_order') {
+              // Recargar pedidos cuando se cree un nuevo pedido (para admins)
+              if (isAdmin) {
+                load();
+              }
             }
           } catch (e) {
             console.error('Error parsing WebSocket message:', e);
@@ -159,7 +164,7 @@ export default function Orders() {
         console.debug('Failed to initialize WebSocket (non-critical):', e);
       }
     }
-  }, [user, isAuthReady]);
+  }, [user, isAuthReady, token, isAdmin]);
 
   if (loading) return <div className="panel muted">Cargando...</div>;
   if (error) return <div className="panel danger">{error}</div>;
@@ -275,10 +280,42 @@ export default function Orders() {
                 <div style={{ marginBottom: "12px" }}>
                   <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                     {["paid", "delivered", "cancelled"].map((status) => {
+                      // Si el estado ya es este, mostrar como informativo (no botón)
+                      if (o.status === status) {
+                        return (
+                          <span
+                            key={status}
+                            className="chip"
+                            style={{
+                              background: getStatusColor(status),
+                              color: "white",
+                              padding: "6px 12px",
+                              fontSize: "12px",
+                              borderRadius: "6px",
+                              cursor: "default"
+                            }}
+                          >
+                            {getStatusLabel(status)}
+                          </span>
+                        );
+                      }
+                      
+                      // No mostrar botón de pagado si el pedido ya está entregado
+                      if (status === 'paid' && (o.status === 'delivered' || o.status === 'cancelled')) {
+                        return null;
+                      }
+                      
                       // No mostrar botón de cancelar si el pedido ya está entregado
                       if (status === 'cancelled' && o.status === 'delivered') {
                         return null;
                       }
+                      
+                      // No mostrar botón si el pedido ya está cancelado
+                      if (o.status === 'cancelled') {
+                        return null;
+                      }
+                      
+                      // Solo mostrar botones para estados que aún no se han alcanzado
                       return (
                         <button
                           key={status}
@@ -295,8 +332,8 @@ export default function Orders() {
                           style={{
                             padding: "6px 12px",
                             fontSize: "12px",
-                            background: o.status === status ? getStatusColor(status) : "#f8fafc",
-                            color: o.status === status ? "white" : "#334155",
+                            background: "#f8fafc",
+                            color: "#334155",
                             border: `1px solid ${getStatusColor(status)}`,
                             opacity: updatingStatus === o.id ? 0.5 : 1
                           }}
