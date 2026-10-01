@@ -1439,3 +1439,39 @@ input:focus, select:focus {
     display: none !important;
   }
 }
+/* Aviso cuando el backend gratuito de Render está despertando */
+.serverWakeBanner {
+  position: sticky;
+  top: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: #fef3c7;
+  color: #78350f;
+  border-bottom: 1px solid #fcd34d;
+  font-size: 14px;
+  text-align: center;
+}
+
+.serverWakeBannerOk {
+  background: #d1fae5;
+  color: #065f46;
+  border-bottom-color: #6ee7b7;
+}
+
+.serverWakeSpinner {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: serverWakeGiro 0.8s linear infinite;
+}
+
+@keyframes serverWakeGiro {
+  to { transform: rotate(360deg); }
+}

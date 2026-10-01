@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import CartDrawer from "./components/CartDrawer";
+import ServerWakeBanner from "./components/ServerWakeBanner";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
@@ -24,6 +25,7 @@ export default function App() {
 
   return (
     <div className="appShell">
+      <ServerWakeBanner />
       <Navbar ui={ui} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
       <main className="container">

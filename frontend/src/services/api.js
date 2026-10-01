@@ -4,7 +4,8 @@ const apiBaseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/a
 
 export const api = axios.create({
   baseURL: apiBaseURL,
-  timeout: 15000
+  // 60 s: el backend gratuito de Render puede tardar ~1 minuto en despertar.
+  timeout: 60000
 });
 
 export function setAuthToken(token) {
