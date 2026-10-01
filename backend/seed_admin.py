@@ -27,11 +27,6 @@ def seed():
                 print("El rol del usuario existente fue actualizado a 'admin'.")
             else:
                 print("El usuario ya tiene rol de 'admin'.")
-            # En producción, mantener la contraseña sincronizada con ADMIN_PASSWORD.
-            if os.getenv("ADMIN_PASSWORD"):
-                existing.password_hash = hash_password(ADMIN_PASSWORD)
-                db.commit()
-                print("Contraseña del admin actualizada desde ADMIN_PASSWORD.")
             return
 
         admin_user = User(
