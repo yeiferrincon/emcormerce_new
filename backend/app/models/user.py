@@ -19,6 +19,8 @@ class UserRole(str, enum.Enum):
     # Tipos de usuario permitidos en la tienda.
     user = "user"
     admin = "admin"
+    # Invitados creados por versiones anteriores (hoy se crean como "user").
+    guest = "guest"
 
 
 class User(Base):
