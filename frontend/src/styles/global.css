@@ -1246,7 +1246,8 @@ input:focus, select:focus {
 /* Robot RopaShop - Icono flotante (visible siempre) */
 .robotIconMobile {
   position: fixed;
-  bottom: 20px;
+  /* Por encima del sello "Powered by Netlify" de la esquina inferior derecha */
+  bottom: 80px;
   right: 20px;
   width: 60px;
   height: auto;
