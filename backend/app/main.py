@@ -157,7 +157,7 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int):
     # Verificar si el usuario es admin leyendo el token del query param
     from app.dependencies.auth import get_current_user
     from app.config.database import SessionLocal
-    from app.models.user import UserRole
+    from app.models.user import User, UserRole
     
     is_admin = False
     try:

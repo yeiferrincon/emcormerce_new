@@ -1,0 +1,37 @@
+# Configuración de Render (Blueprint): base de datos PostgreSQL + backend FastAPI.
+databases:
+  - name: ropashop-db
+    plan: free
+    databaseName: ropashop
+    user: ropashop
+
+services:
+  - type: web
+    name: ropashop-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    # Crea el usuario admin (si no existe) y arranca el servidor.
+    startCommand: python seed_admin.py && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: ENV
+        value: prod
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ropashop-db
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      # Contraseña del usuario admin@ropashop.com (se pide al crear el Blueprint).
+      - key: ADMIN_PASSWORD
+        sync: false
+      # URL del frontend en Netlify, ej: https://ropashop.netlify.app
+      - key: CORS_ORIGINS
+        sync: false
+      # URL pública de este backend, ej: https://ropashop-backend.onrender.com
+      - key: PUBLIC_BASE_URL
+        sync: false

@@ -1,0 +1,14 @@
+# Configuración de Netlify para el frontend (React + Vite).
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Para que las rutas de React (/login, /cart, ...) funcionen al recargar la página.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

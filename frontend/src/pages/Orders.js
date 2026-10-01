@@ -119,9 +119,10 @@ export default function Orders() {
     if (user && isAuthReady) {
       // Conectar WebSocket para actualizaciones en tiempo real
       try {
-        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsHost = window.location.hostname === 'localhost' ? 'localhost:8000' : window.location.host;
-        const wsUrl = `${wsProtocol}//${wsHost}/ws/${user.id}?token=${token}`;
+        // Construir la URL del WebSocket a partir de la URL del backend
+        const apiUrl = new URL(api.defaults.baseURL, window.location.origin);
+        const wsProtocol = apiUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${wsProtocol}//${apiUrl.host}/ws/${user.id}?token=${token}`;
         
         const ws = new WebSocket(wsUrl);
         

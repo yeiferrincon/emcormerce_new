@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -8,6 +9,9 @@ sys.path.append(str(backend_path))
 from app.config.database import SessionLocal
 from app.models.user import User, UserRole
 from app.security.password_hash import hash_password
+
+# En producción se define ADMIN_PASSWORD como variable de entorno.
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin12345")
 
 
 def seed():
@@ -28,7 +32,7 @@ def seed():
         admin_user = User(
             name="Administrador RopaShop",
             email=email,
-            password_hash=hash_password("admin12345"),
+            password_hash=hash_password(ADMIN_PASSWORD),
             role=UserRole.admin,
             phone="+57 300 123 4567",
             address="Oficinas Principales RopaShop, Medellín",
@@ -37,7 +41,7 @@ def seed():
         db.commit()
         print("¡Usuario administrador creado con éxito!")
         print(f"Email: {email}")
-        print("Contraseña: admin12345")
+        print("Contraseña: (la definida en ADMIN_PASSWORD)")
     except Exception as e:
         print(f"Error al crear el administrador: {e}")
     finally:
